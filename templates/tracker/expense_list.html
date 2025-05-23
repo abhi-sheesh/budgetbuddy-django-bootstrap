@@ -1,11 +1,11 @@
 {% extends 'base.html' %}
 {% load humanize %}
 
-{% block title %}Incomes{% endblock %}
+{% block title %}Expenses{% endblock %}
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1>Income Transactions</h1>
+    <h1>Expense Transactions</h1>
     <a href="{% url 'add_transaction' %}" class="btn btn-primary">
         <i class="bi bi-plus"></i> Add Transaction
     </a>
@@ -32,7 +32,7 @@
             </div>
             <div class="col-12">
                 <button type="submit" class="btn btn-primary">Filter</button>
-                <a href="{% url 'incomes' %}" class="btn btn-secondary">Reset</a>
+                <a href="{% url 'expenses' %}" class="btn btn-secondary">Reset</a>
             </div>
         </form>
     </div>
@@ -51,16 +51,16 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for income in incomes %}
+                    {% for expense in expenses %}
                     <tr>
-                        <td>{{ income.date }}</td>
-                        <td>{{ income.category }}</td>
-                        <td>{{ income.description|default:"-" }}</td>
-                        <td class="text-end text-success">${{ income.amount|intcomma }}</td>
+                        <td>{{ expense.date }}</td>
+                        <td>{{ expense.category }}</td>
+                        <td>{{ expense.description|default:"-" }}</td>
+                        <td class="text-end text-danger">${{ expense.amount|intcomma }}</td>
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="4" class="text-center">No income transactions found.</td>
+                        <td colspan="4" class="text-center">No expense transactions found.</td>
                     </tr>
                     {% endfor %}
                 </tbody>
