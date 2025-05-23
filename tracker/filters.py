@@ -9,12 +9,14 @@ class TransactionFilter(django_filters.FilterSet):
     start_date = django_filters.DateFilter(
         field_name='date', 
         lookup_expr='gte',
-        widget=forms.DateInput(attrs={'type': 'date'})
+        widget=forms.DateInput(attrs={'type': 'date'}),
+        label='From ',
     )
     end_date = django_filters.DateFilter(
         field_name='date', 
         lookup_expr='lte',
-        widget=forms.DateInput(attrs={'type': 'date'})
+        widget=forms.DateInput(attrs={'type': 'date'}),
+        label='To ',
     )
     category = django_filters.ModelChoiceFilter(
         queryset=None,
