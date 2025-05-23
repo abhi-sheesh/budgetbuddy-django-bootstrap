@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block title %}Incomes{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Income Transactions</h1>
+    <a href="{% url 'add_transaction' %}" class="btn btn-primary">
+        <i class="bi bi-plus"></i> Add Transaction
+    </a>
+</div>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-3">
+                {{ filter.form.date_range.label_tag }}
+                {{ filter.form.date_range }}
+            </div>
+            <div class="col-md-3">
+                {{ filter.form.start_date.label_tag }}
+                {{ filter.form.start_date }}
+            </div>
+            <div class="col-md-3">
+                {{ filter.form.end_date.label_tag }}
+                {{ filter.form.end_date }}
+            </div>
+            <div class="col-md-3">
+                {{ filter.form.category.label_tag }}
+                {{ filter.form.category }}
+            </div>
+            <div class="col-12">
+                <button type="submit" class="btn btn-primary">Filter</button>
+                <a href="{% url 'incomes' %}" class="btn btn-secondary">Reset</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Category</th>
+                        <th>Description</th>
+                        <th class="text-end">Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for income in incomes %}
+                    <tr>
+                        <td>{{ income.date }}</td>
+                        <td>{{ income.category }}</td>
+                        <td>{{ income.description|default:"-" }}</td>
+                        <td class="text-end text-success">${{ income.amount|intcomma }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center">No income transactions found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

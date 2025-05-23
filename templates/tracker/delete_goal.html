@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block title %}Delete Goal{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header bg-danger text-white">
+        <h5 class="card-title">Delete Goal</h5>
+    </div>
+    <div class="card-body">
+        <p>Are you sure you want to delete the goal "{{ goal.name }}"?</p>
+        <p><strong>Target:</strong> ${{ goal.target_amount }}</p>
+        <p><strong>Current:</strong> ${{ goal.current_amount }}</p>
+        <p><strong>Target Date:</strong> {{ goal.target_date }}</p>
+        
+        <form method="post">
+            {% csrf_token %}
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                <button type="submit" class="btn btn-danger">Confirm Delete</button>
+                <a href="{% url 'goals' %}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

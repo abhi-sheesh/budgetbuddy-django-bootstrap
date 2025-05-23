@@ -1,0 +1,191 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block extra_css %}
+<style>
+    .progress {
+        height: 25px;
+    }
+    .card {
+        margin-bottom: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="card-title">Monthly Summary</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <h6>Income</h6>
+                    <h4 class="text-success">${{ income|intcomma }}</h4>
+                </div>
+                <div class="mb-3">
+                    <h6>Expenses</h6>
+                    <h4 class="text-danger">${{ expenses|intcomma }}</h4>
+                </div>
+                <div>
+                    <h6>Savings</h6>
+                    <h4 class="text-{% if savings >= 0 %}success{% else %}danger{% endif %}">${{ savings|intcomma }}</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="card-title">Expense Breakdown</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="expenseChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="card-title">Recent Transactions</h5>
+            </div>
+            <div class="card-body">
+                <div class="list-group">
+                    {% for transaction in recent_transactions %}
+                    <div class="list-group-item">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">{{ transaction.category }}</h6>
+                            <small>{{ transaction.date }}</small>
+                        </div>
+                        <p class="mb-1">{{ transaction.description|default:"No description" }}</p>
+                        <span class="badge bg-{% if transaction.category.category_type == 'IN' %}success{% else %}danger{% endif %} rounded-pill">
+                            ${{ transaction.amount|intcomma }}
+                        </span>
+                    </div>
+                    {% empty %}
+                    <div class="list-group-item">
+                        No transactions yet.
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="card-title">Budgets</h5>
+            </div>
+            <div class="card-body">
+                {% for budget in budgets %}
+                <div class="mb-3">
+                    <h6>{{ budget.category }} - ${{ budget.amount|intcomma }}</h6>
+                    <div class="progress">
+                        <div class="progress-bar {% if budget.progress > 100 %}bg-danger{% else %}bg-success{% endif %}" 
+                             role="progressbar" 
+                             style="width: {{ budget.progress }}%" 
+                             aria-valuenow="{{ budget.progress }}" 
+                             aria-valuemin="0" 
+                             aria-valuemax="100">
+                            {{ budget.progress|floatformat:0 }}%
+                        </div>
+                    </div>
+                    <small>{{ budget.start_date }} to {{ budget.end_date }}</small>
+                </div>
+                {% empty %}
+                <p>No budgets set up yet.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="card-title">Goals</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% for goal in goals %}
+                    <div class="col-md-4 mb-3">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ goal.name }}</h5>
+                                <p class="card-text">${{ goal.current_amount|intcomma }} of ${{ goal.target_amount|intcomma }}</p>
+                                <div class="progress">
+                                    <div class="progress-bar bg-info" 
+                                         role="progressbar" 
+                                         style="width: {{ goal.progress }}%" 
+                                         aria-valuenow="{{ goal.progress }}" 
+                                         aria-valuemin="0" 
+                                         aria-valuemax="100">
+                                        {{ goal.progress|floatformat:0 }}%
+                                    </div>
+                                </div>
+                                <p class="mt-2"><small>Target: {{ goal.target_date }}</small></p>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="col-12">
+                        <p>No goals set up yet.</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Expense Chart
+    const expenseData = {{ expense_data|safe }};
+    const ctx = document.getElementById('expenseChart').getContext('2d');
+    const expenseChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: expenseData.map(item => item.category),
+            datasets: [{
+                data: expenseData.map(item => item.amount),
+                backgroundColor: [
+                    '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF',
+                    '#FF9F40', '#8AC249', '#EA5F89', '#00BFFF', '#FFD700'
+                ],
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'right',
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.label || '';
+                            if (label) {
+                                label += ': ';
+                            }
+                            label += '$' + context.raw.toFixed(2);
+                            return label;
+                        }
+                    }
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}
