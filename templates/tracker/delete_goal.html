@@ -9,8 +9,8 @@
     </div>
     <div class="card-body">
         <p>Are you sure you want to delete the goal "{{ goal.name }}"?</p>
-        <p><strong>Target:</strong> ${{ goal.target_amount }}</p>
-        <p><strong>Current:</strong> ${{ goal.current_amount }}</p>
+        <p><strong>Target:</strong> Rs {{ goal.target_amount }}</p>
+        <p><strong>Current:</strong> Rs {{ goal.current_amount }}</p>
         <p><strong>Target Date:</strong> {{ goal.target_date }}</p>
         
         <form method="post">

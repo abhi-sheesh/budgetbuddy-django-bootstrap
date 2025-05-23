@@ -57,7 +57,7 @@
                         <td>{{ transaction.category }}</td>
                         <td>{{ transaction.description|default:"-" }}</td>
                         <td class="text-end {% if transaction.category.category_type == 'IN' %}text-success{% else %}text-danger{% endif %}">
-                            ${{ transaction.amount|intcomma }}
+                            Rs {{ transaction.amount|intcomma }}
                         </td>
                         <td>
                             <a href="{% url 'edit_transaction' transaction.pk %}" class="btn btn-sm btn-outline-primary">Edit</a>

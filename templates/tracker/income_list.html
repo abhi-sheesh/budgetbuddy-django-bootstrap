@@ -56,7 +56,7 @@
                         <td>{{ income.date }}</td>
                         <td>{{ income.category }}</td>
                         <td>{{ income.description|default:"-" }}</td>
-                        <td class="text-end text-success">${{ income.amount|intcomma }}</td>
+                        <td class="text-end text-success">Rs {{ income.amount|intcomma }}</td>
                     </tr>
                     {% empty %}
                     <tr>

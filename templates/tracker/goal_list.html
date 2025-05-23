@@ -25,8 +25,8 @@
                     {% endif %}
                 </div>
                 <p class="card-text">
-                    <strong>Target:</strong> ${{ goal.target_amount|intcomma }}<br>
-                    <strong>Current:</strong> ${{ goal.current_amount|intcomma }}<br>
+                    <strong>Target:</strong> Rs {{ goal.target_amount|intcomma }}<br>
+                    <strong>Current:</strong> Rs {{ goal.current_amount|intcomma }}<br>
                     <strong>Target Date:</strong> {{ goal.target_date }}
                 </p>
                 <div class="progress mb-3">
