@@ -11,7 +11,7 @@ urlpatterns = [
     # Authentication URLs
     path('login/', auth_views.LoginView.as_view(template_name='registration/login.html', redirect_authenticated_user = True), name='login'),
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
-    
+    path('signup/', views.signup, name='signup'),
     # Include tracker app URLs
     path('', include('tracker.urls')),
 ]
