@@ -32,6 +32,14 @@ class Budget(models.Model):
     start_date = models.DateField()
     end_date = models.DateField()
 
+    def clean(self):
+        if self.category.category_type != 'EX':
+            raise ValidationError("Budgeting can only be applied to expense categories")
+
+    def save(self, *args, **kwargs):
+        self.full_clean()  # Runs clean() validation
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return f"{self.category} - {self.amount} ({self.start_date} to {self.end_date})"
 

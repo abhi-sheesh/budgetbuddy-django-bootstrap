@@ -38,7 +38,7 @@ class BudgetForm(forms.ModelForm):
         
         if self.user:
             # Filter categories by user
-            self.fields['category'].queryset = Category.objects.filter(user=self.user)
+            self.fields['category'].queryset = Category.objects.filter(user=self.user, category_type = 'EX')
             
     class Meta:
         model = Budget
