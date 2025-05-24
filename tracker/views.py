@@ -27,16 +27,12 @@ def signup(request):
 
 @login_required
 def dashboard(request):
-    # Recent transactions
     recent_transactions = Transaction.objects.filter(user=request.user).order_by('-date')[:5]
     
-    # Budget progress
     budgets = Budget.objects.filter(user=request.user, end_date__gte=timezone.now())
     
-    # Goal progress
     goals = Goal.objects.filter(user=request.user, completed=False)
     
-    # Monthly summary
     today = timezone.now()
     month_start = today.replace(day=1)
     month_end = month_start + timedelta(days=32)
@@ -58,7 +54,6 @@ def dashboard(request):
     
     savings = income - expenses
     
-    # Chart data
     expense_categories = Category.objects.filter(user=request.user, category_type='EX')
     expense_data = []
     for category in expense_categories:
@@ -102,11 +97,9 @@ def add_transaction(request):
 def transaction_list(request):
     transactions = Transaction.objects.filter(user=request.user).order_by('-date')
     
-    # Filtering
     transaction_filter = TransactionFilter(request.GET, queryset=transactions, user=request.user)
     transactions = transaction_filter.qs
     
-    # Pagination
     paginator = Paginator(transactions, 10)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
@@ -124,7 +117,6 @@ def income_list(request):
         category__category_type='IN'
     ).order_by('-date')
     
-    # Filtering
     transaction_filter = TransactionFilter(request.GET, queryset=incomes, user=request.user)
     incomes = transaction_filter.qs
     
@@ -141,7 +133,6 @@ def expense_list(request):
         category__category_type='EX'
     ).order_by('-date')
     
-    # Filtering
     transaction_filter = TransactionFilter(request.GET, queryset=expenses, user=request.user)
     expenses = transaction_filter.qs
     
@@ -207,44 +198,57 @@ def goal_list(request):
 
 @login_required
 def reports(request):
-    # Monthly income/expense data for the past 12 months
     today = timezone.now()
     data = []
     
     for i in range(12):
-        month = today - timedelta(days=30*i)
-        month_start = month.replace(day=1)
+        today = timezone.now()
+        month_start = today.replace(day=1)
         month_end = month_start + timedelta(days=32)
         month_end = month_end.replace(day=1) - timedelta(days=1)
         
-        income = Transaction.objects.filter(
-            user=request.user,
-            category__category_type='IN',
-            date__gte=month_start,
-            date__lte=month_end
-        ).aggregate(total=Sum('amount'))['total'] or 0
+        # income = Transaction.objects.filter(
+        #     user=request.user,
+        #     category__category_type='IN',
+        #     date__gte=month_start,
+        #     date__lte=month_end
+        # ).aggregate(total=Sum('amount'))['total'] or 0
+
+        expense_categories = Category.objects.filter(user=request.user, category_type='EX')
+        expense_data = []
+        for category in expense_categories:
+            total = Transaction.objects.filter(
+                user=request.user,
+                category=category,
+                date__gte=month_start,
+                date__lte=month_end
+            ).aggregate(total=Sum('amount'))['total'] or 0
+            if total > 0:
+                expense_data.append({
+                'category': category.name,
+                'amount': float(total)
+            })
         
-        expense = Transaction.objects.filter(
-            user=request.user,
-            category__category_type='EX',
-            date__gte=month_start,
-            date__lte=month_end
-        ).aggregate(total=Sum('amount'))['total'] or 0
+        # expense = Transaction.objects.filter(
+        #     user=request.user,
+        #     category__category_type='EX',
+        #     date__gte=month_start,
+        #     date__lte=month_end
+        # ).aggregate(total=Sum('amount'))['total'] or 0
         
-        data.append({
-            'month': month_start.strftime('%b %Y'),
-            'income': float(income),
-            'expense': float(expense),
-        })
+    #     data.append({
+    #         'month': month_start.strftime('%b %Y'),
+    #         'income': float(income),
+    #         'expense': float(expense),
+    #     })
     
-    data.reverse()
+    # data.reverse()
     
     context = {
-        'monthly_data': json.dumps(data),
+        'expense_data': json.dumps(data),
     }
     return render(request, 'tracker/reports.html', context)
 
-# Transaction Edit/Delete
 @login_required
 def edit_transaction(request, pk):
     transaction = get_object_or_404(Transaction, pk=pk, user=request.user)
@@ -265,7 +269,6 @@ def delete_transaction(request, pk):
         return redirect('transactions')
     return render(request, 'tracker/delete_transaction.html', {'transaction': transaction})
 
-# Category Edit/Delete
 @login_required
 def edit_category(request, pk):
     category = get_object_or_404(Category, pk=pk, user=request.user)
@@ -286,7 +289,6 @@ def delete_category(request, pk):
         return redirect('categories')
     return render(request, 'tracker/delete_category.html', {'category': category})
 
-# Budget Edit/Delete
 @login_required
 def edit_budget(request, pk):
     budget = get_object_or_404(Budget, pk=pk, user=request.user)
@@ -307,7 +309,6 @@ def delete_budget(request, pk):
         return redirect('budgets')
     return render(request, 'tracker/delete_budget.html', {'budget': budget})
 
-# Goal Edit/Delete
 @login_required
 def edit_goal(request, pk):
     goal = get_object_or_404(Goal, pk=pk, user=request.user)
@@ -337,3 +338,4 @@ def edit_transaction(request, pk):
             form.save()
             messages.success(request, 'Transaction updated successfully!')
             return redirect('transactions')
+
