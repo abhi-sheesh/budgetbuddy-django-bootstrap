@@ -1,6 +1,7 @@
 from django.urls import path
 from . import views
 from django.contrib.auth.decorators import login_required
+from .views import reports, chart_data
 
 urlpatterns = [
     path('', views.dashboard, name='dashboard'),
@@ -29,4 +30,5 @@ urlpatterns = [
     path('goals/delete/<int:pk>/', views.delete_goal, name='delete_goal'),
 
     path('reports/', views.reports, name='reports'),
+    path('api/chart-data/', chart_data, name='chart_data'),
 ]

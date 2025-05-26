@@ -1,57 +1,71 @@
 {% extends 'base.html' %}
 
-{% block title %}Reports{% endblock %}
-
 {% block extra_css %}
 <style>
     .chart-container {
-        position: relative;
-        height: 300px;
-        margin-bottom: 30px;
-    }
-    .chart-card {
-        background-color: #0f3460;
-        border: 1px solid rgba(108, 92, 231, 0.3);
+        height: 400px;
         margin-bottom: 2rem;
+    }
+    .time-range-btn {
+        background-color: #2d2d2d;
+        color: #e0e0e0;
+        border: 1px solid #424242;
+    }
+    .time-range-btn.active {
+        background-color: #9c27b0;
+        color: white;
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<h1 class="mb-4">Financial Reports</h1>
-
-<div class="card mb-4">
-    <div class="card-header bg-primary text-white">
-        <h5 class="card-title">Monthly Income vs Expenses</h5>
+<div class="container">
+    <h2 class="my-4">Financial Reports</h2>
+    
+    <!-- Time Range Selector -->
+    <div class="btn-group mb-4">
+        <button class="btn time-range-btn active" onclick="updateCharts('monthly')">Monthly</button>
+        <button class="btn time-range-btn" onclick="updateCharts('quarterly')">Quarterly</button>
+        <button class="btn time-range-btn" onclick="updateCharts('yearly')">Yearly</button>
     </div>
-    <div class="card-body">
-        <div class="chart-container">
-            <canvas id="monthlyChart"></canvas>
+    
+    <!-- Income vs Expenses Chart -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5>Income vs Expenses</h5>
+        </div>
+        <div class="card-body">
+            <div class="chart-container">
+                <canvas id="comparisonChart"></canvas>
+            </div>
         </div>
     </div>
-</div>
-
-<div class="row">
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-header bg-primary text-white">
-                <h5 class="card-title">Income Breakdown</h5>
-            </div>
-            <div class="card-body">
-                <div class="chart-container">
-                    <canvas id="incomeChart"></canvas>
+    
+    <div class="row">
+        <!-- Income Breakdown -->
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>Income Sources</h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="incomeChart"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-header bg-primary text-white">
-                <h5 class="card-title">Expense Breakdown</h5>
-            </div>
-            <div class="card-body">
-                <div class="chart-container">
-                    <canvas id="expenseChart"></canvas>
+        
+        <!-- Expense Breakdown -->
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>Expense Categories</h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="expenseChart"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
@@ -60,5 +74,139 @@
 {% endblock %}
 
 {% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const colors = {
+        purple: 'rgba(156, 39, 176, 0.8)',
+        orange: 'rgba(255, 152, 0, 0.8)',
+        green: 'rgba(76, 175, 80, 0.8)',
+        red: 'rgba(244, 67, 54, 0.8)',
+        yellow: 'rgba(255, 193, 7, 0.8)',
+        text: '#black',
+        grid: 'rgba(255, 255, 255, 0.1)'
+    };
 
+    let comparisonChart, incomeChart, expenseChart;
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        comparisonChart = new Chart(
+            document.getElementById('comparisonChart').getContext('2d'),
+            {
+                type: 'bar',
+                options: getChartOptions('Income vs Expenses')
+            }
+        );
+        
+        incomeChart = new Chart(
+            document.getElementById('incomeChart').getContext('2d'),
+            {
+                type: 'doughnut',
+                options: getChartOptions('Income Sources')
+            }
+        );
+        
+        expenseChart = new Chart(
+            document.getElementById('expenseChart').getContext('2d'),
+            {
+                type: 'doughnut',
+                options: getChartOptions('Expense Categories')
+            }
+        );
+        
+        updateCharts('monthly');
+    });
+    
+    function getChartOptions(title) {
+        return {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: { color: colors.text }
+                },
+                title: { 
+                    display: true,
+                    text: title,
+                    color: colors.text
+                },
+                tooltip: {
+                    backgroundColor: '#2d2d2d',
+                    titleColor: colors.text,
+                    bodyColor: colors.text,
+                    borderColor: '#424242',
+                    callbacks: {
+                        label: function(context) {
+                            return `${context.label}: ₹${context.raw.toFixed(2)}`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: { 
+                    grid: { color: colors.grid },
+                    ticks: { color: colors.text }
+                },
+                y: { 
+                    grid: { color: colors.grid },
+                    ticks: { color: colors.text }
+                }
+            }
+        };
+    }
+    
+    function updateCharts(range) {
+        document.querySelectorAll('.time-range-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.textContent.toLowerCase() === range);
+        });
+        
+        fetch(`/api/chart-data/?range=${range}`)
+            .then(response => response.json())
+            .then(data => {
+                comparisonChart.data = {
+                    labels: data.monthly.labels,
+                    datasets: [
+                        {
+                            label: 'Income',
+                            data: data.monthly.income,
+                            backgroundColor: colors.green
+                        },
+                        {
+                            label: 'Expenses',
+                            data: data.monthly.expenses,
+                            backgroundColor: colors.red
+                        }
+                    ]
+                };
+                comparisonChart.update();
+                
+                incomeChart.data = {
+                    labels: data.income.labels,
+                    datasets: [{
+                        data: data.income.data,
+                        backgroundColor: [
+                            colors.green,
+                            colors.purple,
+                            colors.yellow,
+                            colors.orange
+                        ]
+                    }]
+                };
+                incomeChart.update();
+                
+                expenseChart.data = {
+                    labels: data.expenses.labels,
+                    datasets: [{
+                        data: data.expenses.data,
+                        backgroundColor: [
+                            colors.purple,
+                            colors.red,
+                            colors.orange,
+                            colors.yellow
+                        ]
+                    }]
+                };
+                expenseChart.update();
+            });
+    }
+</script>
 {% endblock %}

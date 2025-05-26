@@ -12,6 +12,7 @@ from .filters import TransactionFilter
 from django.core.paginator import Paginator
 from django.views.generic import ListView
 from django.contrib import messages
+from django.http import JsonResponse
 import json
 
 def signup(request):
@@ -198,56 +199,57 @@ def goal_list(request):
 
 @login_required
 def reports(request):
-    today = timezone.now()
-    data = []
-    
-    for i in range(12):
-        today = timezone.now()
-        month_start = today.replace(day=1)
-        month_end = month_start + timedelta(days=32)
-        month_end = month_end.replace(day=1) - timedelta(days=1)
-        
-        # income = Transaction.objects.filter(
-        #     user=request.user,
-        #     category__category_type='IN',
-        #     date__gte=month_start,
-        #     date__lte=month_end
-        # ).aggregate(total=Sum('amount'))['total'] or 0
+    return render(request, 'tracker/reports.html')
 
-        expense_categories = Category.objects.filter(user=request.user, category_type='EX')
-        expense_data = []
-        for category in expense_categories:
-            total = Transaction.objects.filter(
-                user=request.user,
-                category=category,
-                date__gte=month_start,
-                date__lte=month_end
-            ).aggregate(total=Sum('amount'))['total'] or 0
-            if total > 0:
-                expense_data.append({
-                'category': category.name,
-                'amount': float(total)
-            })
-        
-        # expense = Transaction.objects.filter(
-        #     user=request.user,
-        #     category__category_type='EX',
-        #     date__gte=month_start,
-        #     date__lte=month_end
-        # ).aggregate(total=Sum('amount'))['total'] or 0
-        
-    #     data.append({
-    #         'month': month_start.strftime('%b %Y'),
-    #         'income': float(income),
-    #         'expense': float(expense),
-    #     })
+@login_required
+def chart_data(request):
+    time_range = request.GET.get('range', 'monthly')
+    user = request.user
     
-    # data.reverse()
+    # Calculate date range
+    today = datetime.now().date()
+    if time_range == 'yearly':
+        start_date = today - timedelta(days=365)
+    elif time_range == 'quarterly':
+        start_date = today - timedelta(days=90)
+    else:  # monthly
+        start_date = today - timedelta(days=30)
     
-    context = {
-        'expense_data': json.dumps(data),
-    }
-    return render(request, 'tracker/reports.html', context)
+    # Monthly income vs expenses
+    transactions = Transaction.objects.filter(
+        user=user,
+        date__range=[start_date, today]
+    ).values('date', 'category__category_type').annotate(amount=Sum('amount'))
+    
+    # Expense by category
+    expenses = Transaction.objects.filter(
+        user=user,
+        category__category_type='EX',
+        date__range=[start_date, today]
+    ).values('category__name').annotate(total=Sum('amount')).order_by('-total')
+    
+    # Income by category
+    incomes = Transaction.objects.filter(
+        user=user,
+        category__category_type='IN', 
+        date__range=[start_date, today]
+    ).values('category__name').annotate(total=Sum('amount')).order_by('-total')
+    
+    return JsonResponse({
+        'monthly': {
+            'labels': [t['date'].strftime('%b %d') for t in transactions],
+            'income': [float(t['amount']) for t in transactions if t['category__category_type'] == 'IN'],
+            'expenses': [float(t['amount']) for t in transactions if t['category__category_type'] == 'EX']
+        },
+        'expenses': {
+            'labels': [e['category__name'] for e in expenses],
+            'data': [float(e['total']) for e in expenses]
+        },
+        'income': {
+            'labels': [i['category__name'] for i in incomes],
+            'data': [float(i['total']) for i in incomes]
+        }
+    })
 
 @login_required
 def edit_transaction(request, pk):
