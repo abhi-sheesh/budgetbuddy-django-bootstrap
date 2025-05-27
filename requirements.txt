@@ -1,0 +1,11 @@
+install pip (for debian/ubuntu: sudo apt install python3-pip)
+
+in command line:
+1. python -m venv {name_of_virtual_env} [python -m venv myenv]
+2. activate venv [venv/Scripts/activate on windows powershell, Source venv/bin/activate on linux]
+
+pip install django
+
+django manage.py runserver (will run at port 8000 default)
+
+install necessary libraries
