@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <h2>Your Spending Patterns</h2>
+    
+    {% if patterns %}
+    <div class="row">
+        {% for pattern in patterns %}
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Pattern {{ forloop.counter }}</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Categories:</strong> {{ pattern.categories|join:", " }}</p>
+                    <p><strong>Average Amount:</strong> Rs {{ pattern.average_amount|floatformat:2 }}</p>
+                    <p><strong>Common Day:</strong> Around {{ pattern.average_day }}th of month</p>
+                    <p><strong>Transactions:</strong> {{ pattern.size }}</p>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        Not enough data to detect spending patterns. Add more transactions.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

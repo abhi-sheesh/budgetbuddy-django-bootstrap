@@ -17,6 +17,7 @@ import json
 from .utils import check_budget_alerts, check_goal_alerts, check_bill_reminders
 from django.contrib import messages
 import logging
+from .mining import detect_spending_patterns
 
 def signup(request):
     if request.method == 'POST':
@@ -487,3 +488,7 @@ def notification_settings(request):
         form = NotificationPreferenceForm(instance=prefs)
     
     return render(request, 'tracker/notification_settings.html', {'form': form})
+
+def spending_patterns(request):
+    patterns = detect_spending_patterns(request.user)
+    return render(request, 'tracker/patterns.html', {'patterns': patterns})
