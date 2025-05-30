@@ -1,22 +1,93 @@
 {% extends 'base.html' %}
 {% load crispy_forms_tags %}
 
-{% block title %}Add Goal{% endblock %}
-
 {% block content %}
-<div class="card">
-    <div class="card-header bg-primary text-white">
-        <h5 class="card-title">Add New Financial Goal</h5>
-    </div>
-    <div class="card-body">
-        <form method="post">
-            {% csrf_token %}
-            {{ form|crispy }}
-            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                <button type="submit" class="btn btn-primary">Save</button>
-                <a href="{% url 'goals' %}" class="btn btn-secondary">Cancel</a>
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        {% if bill %}Edit Bill{% else %}Add New Bill{% endif %}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                {{ form.name|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.amount|as_crispy_field }}
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                {{ form.due_date|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.recurring|as_crispy_field }}
+                            </div>
+                        </div>
+                        
+                        <div id="recurring-fields" class="row" style="display: none;">
+                            <div class="col-md-6">
+                                {{ form.recurring_frequency|as_crispy_field }}
+                            </div>
+                        </div>
+                        
+                        <div class="form-group mt-4">
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <a href="{% url 'bill_list' %}" class="btn btn-secondary me-md-2">
+                                    <i class="bi bi-x-circle"></i> Cancel
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-save"></i> {% if bill %}Update{% else %}Save{% endif %} Bill
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
             </div>
-        </form>
+        </div>
     </div>
 </div>
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Show/hide recurring frequency field based on recurring checkbox
+    const recurringCheckbox = document.querySelector('#id_recurring');
+    const recurringFields = document.querySelector('#recurring-fields');
+    
+    function toggleRecurringFields() {
+        if (recurringCheckbox.checked) {
+            recurringFields.style.display = 'flex';
+        } else {
+            recurringFields.style.display = 'none';
+        }
+    }
+    
+    // Initial check
+    toggleRecurringFields();
+    
+    // Add event listener
+    recurringCheckbox.addEventListener('change', toggleRecurringFields);
+    
+    // Initialize date picker
+    const dueDateField = document.querySelector('#id_due_date');
+    if (dueDateField) {
+        dueDateField.type = 'date';
+        
+        // Set minimum date to today
+        const today = new Date().toISOString().split('T')[0];
+        dueDateField.min = today;
+    }
+});
+</script>
+{% endblock %}
+
 {% endblock %}

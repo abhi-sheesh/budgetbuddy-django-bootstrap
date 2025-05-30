@@ -35,6 +35,9 @@ urlpatterns = [
     path('bills/', bill_list, name='bill_list'),
     path('bills/add/', add_bill, name='add_bill'),
     path('bills/<int:bill_id>/paid/', mark_bill_paid, name='mark_bill_paid'),
+    path('bills/<int:bill_id>/edit/', views.edit_bill, name='edit_bill'),
+    path('bills/<int:bill_id>/delete/', views.delete_bill, name='delete_bill'),
+
     path('notifications/', notifications, name='notifications'),
     path('notifications/<int:notification_id>/read/', mark_notification_read, name='mark_notification_read'),
     path('notifications/clear/', clear_notifications, name='clear_notifications'),

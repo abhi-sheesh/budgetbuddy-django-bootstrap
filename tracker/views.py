@@ -374,6 +374,32 @@ def mark_paid(request, bill_id):
     
     return redirect('bills')
 
+@login_required
+def edit_bill(request, bill_id):
+    bill = get_object_or_404(Bill, id=bill_id, user=request.user)
+    
+    if request.method == 'POST':
+        form = BillForm(request.POST, instance=bill)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Bill updated successfully!")
+            return redirect('bill_list')
+    else:
+        form = BillForm(instance=bill)
+    
+    return render(request, 'tracker/edit_bill.html', {'form': form, 'bill': bill})
+
+@login_required
+def delete_bill(request, bill_id):
+    bill = get_object_or_404(Bill, id=bill_id, user=request.user)
+    
+    if request.method == 'POST':
+        bill.delete()
+        messages.success(request, "Bill deleted successfully!")
+        return redirect('bill_list')
+    
+    return render(request, 'tracker/delete_bill.html', {'bill': bill})
+
 def notifications(request):
     notifications = Notification.objects.filter(user=request.user)
     unread = notifications.filter(is_read=False)

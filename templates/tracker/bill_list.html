@@ -23,9 +23,10 @@
                 </thead>
                 <tbody>
                     {% for bill in bills %}
+                    {% if not bill.is_paid or not bill.recurring %}
                     <tr class="{% if not bill.is_paid and bill.due_date < today %}table-danger{% elif not bill.is_paid %}table-warning{% endif %}">
                         <td>{{ bill.name }}</td>
-                        <td>₹{{ bill.amount }}</td>
+                        <td>Rs {{ bill.amount }}</td>
                         <td>{{ bill.due_date }}</td>
                         <td>
                             {% if bill.is_paid %}
@@ -41,7 +42,12 @@
                                 </a>
                             {% endif %}
                         </td>
+                        <td>
+                            <a href="{% url 'edit_bill' bill.id %}" class="btn btn-sm btn-outline-primary">Edit</a>
+                            <a href="{% url 'delete_bill' bill.id %}" class="btn btn-sm btn-outline-danger">Delete</a>
+                        </td>
                     </tr>
+                    {% endif %}
                     {% empty %}
                     <tr>
                         <td colspan="5" class="text-center">No bills found</td>

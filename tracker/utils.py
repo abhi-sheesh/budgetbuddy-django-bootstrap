@@ -85,7 +85,7 @@ def check_bill_reminders(user):
         freq = 'DAILY' if days_until <= 3 else 'WEEKLY'
         create_notification(
             user,
-            f"Bill '{bill.name}' (₹{bill.amount}) due {'today' if days_until == 0 else f'in {days_until} days'}",
+            f"Bill '{bill.name}' (Rs {bill.amount}) due {'today' if days_until == 0 else f'in {days_until} days'}",
             'BILL',
             freq
         )
