@@ -1,5 +1,5 @@
 from django import forms
-from .models import Transaction, Category, Budget, Goal
+from .models import Transaction, Category, Budget, Goal, Bill, NotificationPreference
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 
@@ -54,4 +54,23 @@ class GoalForm(forms.ModelForm):
         fields = ['name', 'target_amount', 'current_amount', 'target_date']
         widgets = {
             'target_date': forms.DateInput(attrs={'type': 'date'}),
+        }
+
+from django import forms
+from .models import Bill
+
+class BillForm(forms.ModelForm):
+    class Meta:
+        model = Bill
+        fields = ['name', 'amount', 'due_date', 'recurring', 'recurring_frequency']
+        widgets = {
+            'due_date': forms.DateInput(attrs={'type': 'date'}),
+        }
+
+class NotificationPreferenceForm(forms.ModelForm):
+    class Meta:
+        model = NotificationPreference
+        fields = '__all__'
+        widgets = {
+            'user': forms.HiddenInput()
         }

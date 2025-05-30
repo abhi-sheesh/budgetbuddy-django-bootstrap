@@ -1,8 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login, authenticate
-from .forms import SignUpForm, TransactionForm, CategoryForm, BudgetForm, GoalForm
-from .models import Transaction, Category, Budget, Goal
+from .forms import SignUpForm, TransactionForm, CategoryForm, BudgetForm, GoalForm, BillForm, NotificationPreferenceForm
+from .models import Transaction, Category, Budget, Goal, Bill, Notification, NotificationPreference
 from django.db.models import Sum
 from django.utils import timezone
 from datetime import datetime, timedelta
@@ -14,6 +14,9 @@ from django.views.generic import ListView
 from django.contrib import messages
 from django.http import JsonResponse
 import json
+from .utils import check_budget_alerts, check_goal_alerts, check_bill_reminders
+from django.contrib import messages
+import logging
 
 def signup(request):
     if request.method == 'POST':
@@ -341,3 +344,146 @@ def edit_transaction(request, pk):
             messages.success(request, 'Transaction updated successfully!')
             return redirect('transactions')
 
+def bills(request):
+    bills = Bill.objects.filter(user=request.user).order_by('due_date')
+    context = {
+        'bills': bills,
+        'overdue': bills.filter(is_paid=False, due_date__lt=timezone.now().date()),
+        'due_soon': bills.filter(is_paid=False, due_date__range=[
+            timezone.now().date(), 
+            timezone.now().date() + timedelta(days=3)
+        ])
+    }
+    return render(request, 'tracker/bills.html', context)
+
+def mark_paid(request, bill_id):
+    bill = get_object_or_404(Bill, id=bill_id, user=request.user)
+    bill.is_paid = True
+    bill.save()
+    
+    # Create a transaction record if needed
+    if request.POST.get('create_transaction'):
+        Transaction.objects.create(
+            user=request.user,
+            amount=-bill.amount,
+            category=bill.category,
+            date=timezone.now().date(),
+            description=f"Payment for {bill.name}"
+        )
+    
+    return redirect('bills')
+
+def notifications(request):
+    notifications = Notification.objects.filter(user=request.user)
+    unread = notifications.filter(is_read=False)
+    for notification in unread:
+        notification.is_read = True
+        notification.save()
+    
+    return render(request, 'tracker/notifications.html', 
+                 {'notifications': notifications})
+
+@login_required
+def bill_list(request):
+    bills = Bill.objects.filter(user=request.user).order_by('due_date')
+    return render(request, 'tracker/bill_list.html', {'bills': bills})
+
+@login_required
+def add_bill(request):
+    if request.method == 'POST':
+        form = BillForm(request.POST)
+        if form.is_valid():
+            bill = form.save(commit=False)
+            bill.user = request.user
+            bill.save()
+            return redirect('bill_list')
+    else:
+        form = BillForm()
+    return render(request, 'tracker/add_bill.html', {'form': form})
+
+@login_required
+def mark_bill_paid(request, bill_id):
+    bill = Bill.objects.get(id=bill_id, user=request.user)
+    bill.is_paid = True
+    bill.save()
+    
+    if bill.recurring:
+        new_due_date = calculate_next_due_date(bill.due_date, bill.recurring_frequency)
+        Bill.objects.create(
+            user=request.user,
+            name=bill.name,
+            amount=bill.amount,
+            due_date=new_due_date,
+            recurring=True,
+            recurring_frequency=bill.recurring_frequency
+        )
+    
+    return redirect('bill_list')
+
+def calculate_next_due_date(current_date, frequency):
+    if frequency == 'WEEKLY':
+        return current_date + timezone.timedelta(weeks=1)
+    elif frequency == 'MONTHLY':
+        return current_date + timezone.timedelta(days=30)
+    elif frequency == 'YEARLY':
+        return current_date + timezone.timedelta(days=365)
+    return current_date
+
+@login_required
+def notifications(request):
+    if request.method == 'POST':
+        # Handle any form submissions here if needed
+        pass
+    
+    # Check for new alerts
+    check_budget_alerts(request.user)
+    check_goal_alerts(request.user)
+    check_bill_reminders(request.user)
+    
+    notifications = Notification.objects.filter(user=request.user).order_by('-created_at')
+    unread_count = notifications.filter(is_read=False).count()
+    
+    return render(request, 'tracker/notifications.html', {
+        'notifications': notifications,
+        'unread_count': unread_count
+    })
+
+@login_required
+def mark_notification_read(request, notification_id):
+    notification = Notification.objects.get(id=notification_id, user=request.user)
+    notification.is_read = True
+    notification.save()
+    return redirect('notifications')
+
+logger = logging.getLogger(__name__)
+
+@login_required
+def clear_notifications(request):
+    if request.method == 'POST':
+        try:
+            # Get count before deletion for message
+            count = Notification.objects.filter(user=request.user).count()
+            
+            # Perform deletion
+            Notification.objects.filter(user=request.user).delete()
+            
+            messages.success(request, f"Successfully deleted {count} notifications")
+        except Exception as e:
+            messages.error(request, "Failed to delete notifications")
+            logger.exception("Notification deletion failed")
+    
+    return redirect('notifications')
+
+@login_required
+def notification_settings(request):
+    prefs = NotificationPreference.objects.get_or_create(user=request.user)[0]
+    
+    if request.method == 'POST':
+        form = NotificationPreferenceForm(request.POST, instance=prefs)
+        if form.is_valid():
+            form.save()
+            return redirect('notifications')
+    else:
+        form = NotificationPreferenceForm(instance=prefs)
+    
+    return render(request, 'tracker/notification_settings.html', {'form': form})

@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Your Bills</h2>
+        <a href="{% url 'add_bill' %}" class="btn btn-primary">
+            <i class="bi bi-plus"></i> Add Bill
+        </a>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Amount</th>
+                        <th>Due Date</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for bill in bills %}
+                    <tr class="{% if not bill.is_paid and bill.due_date < today %}table-danger{% elif not bill.is_paid %}table-warning{% endif %}">
+                        <td>{{ bill.name }}</td>
+                        <td>₹{{ bill.amount }}</td>
+                        <td>{{ bill.due_date }}</td>
+                        <td>
+                            {% if bill.is_paid %}
+                                <span class="badge bg-success">Paid</span>
+                            {% else %}
+                                <span class="badge bg-warning text-dark">Pending</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if not bill.is_paid %}
+                                <a href="{% url 'mark_bill_paid' bill.id %}" class="btn btn-sm btn-success">
+                                    Mark Paid
+                                </a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center">No bills found</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,7 +1,7 @@
 from django.urls import path
 from . import views
 from django.contrib.auth.decorators import login_required
-from .views import reports, chart_data
+from .views import reports, chart_data, bill_list, add_bill, mark_bill_paid, notifications, mark_notification_read, clear_notifications, notification_settings
 
 urlpatterns = [
     path('', views.dashboard, name='dashboard'),
@@ -31,4 +31,12 @@ urlpatterns = [
 
     path('reports/', views.reports, name='reports'),
     path('api/chart-data/', chart_data, name='chart_data'),
+
+    path('bills/', bill_list, name='bill_list'),
+    path('bills/add/', add_bill, name='add_bill'),
+    path('bills/<int:bill_id>/paid/', mark_bill_paid, name='mark_bill_paid'),
+    path('notifications/', notifications, name='notifications'),
+    path('notifications/<int:notification_id>/read/', mark_notification_read, name='mark_notification_read'),
+    path('notifications/clear/', clear_notifications, name='clear_notifications'),
+    path('notifications/settings/', notification_settings, name='notification_settings')
 ]

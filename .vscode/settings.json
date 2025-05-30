@@ -1,0 +1,8 @@
+{
+  "python.pythonPath": "venv\\Scripts\\python.exe", // Windows
+  // For Mac/Linux: "venv/bin/python"
+  "python.envFile": "${workspaceFolder}/.env",
+  "terminal.integrated.env.windows": {
+    "DJANGO_SETTINGS_MODULE": "finance_tracker.settings"
+  }
+}

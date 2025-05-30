@@ -66,3 +66,46 @@ class Goal(models.Model):
 
     def progress(self):
         return (self.current_amount / self.target_amount) * 100 if self.target_amount else 0
+
+class Notification(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    message = models.CharField(max_length=255)
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    notification_type = models.CharField(max_length=20, choices=[
+        ('GOAL', 'Goal Alert'),
+        ('BUDGET', 'Budget Alert'), 
+        ('BILL', 'Bill Reminder')
+    ])
+    last_sent = models.DateTimeField(auto_now_add=True)
+    repeat_frequency = models.CharField(max_length=10, choices=[
+        ('ONCE', 'Once'),
+        ('DAILY', 'Daily'),
+        ('WEEKLY', 'Weekly')
+    ], default='ONCE')
+    is_active = models.BooleanField(default=True)
+
+class Bill(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    name = models.CharField(max_length=100)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    due_date = models.DateField()
+    is_paid = models.BooleanField(default=False)
+    recurring = models.BooleanField(default=False)
+    recurring_frequency = models.CharField(max_length=20, blank=True, choices=[
+        ('WEEKLY', 'Weekly'),
+        ('MONTHLY', 'Monthly'),
+        ('YEARLY', 'Yearly')
+    ])
+
+    def __str__(self):
+        return f"{self.name} - ₹{self.amount} (Due: {self.due_date})"
+
+class NotificationPreference(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    budget_alerts = models.BooleanField(default=True)
+    goal_alerts = models.BooleanField(default=True)
+    bill_reminders = models.BooleanField(default=True)
+    budget_threshold = models.IntegerField(default=90)
+    goal_days_prior = models.IntegerField(default=7)
+    bill_days_prior = models.IntegerField(default=3)

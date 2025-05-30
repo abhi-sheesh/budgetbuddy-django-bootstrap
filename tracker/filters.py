@@ -1,5 +1,5 @@
 import django_filters
-from .models import Transaction
+from .models import Transaction, Bill
 from .models import Category
 from django import forms
 from django.utils import timezone
@@ -32,3 +32,11 @@ class TransactionFilter(django_filters.FilterSet):
         super().__init__(*args, **kwargs)
         if user is not None:
             self.filters['category'].queryset = Category.objects.filter(user=user)
+
+class BillForm(forms.ModelForm):
+    class Meta:
+        model = Bill
+        fields = ['name', 'amount', 'due_date', 'recurring', 'recurring_frequency']
+        widgets = {
+            'due_date': forms.DateInput(attrs={'type': 'date'}),
+        }
