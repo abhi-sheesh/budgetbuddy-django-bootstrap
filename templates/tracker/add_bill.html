@@ -59,7 +59,6 @@
 {% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Show/hide recurring frequency field based on recurring checkbox
     const recurringCheckbox = document.querySelector('#id_recurring');
     const recurringFields = document.querySelector('#recurring-fields');
     
@@ -71,18 +70,14 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // Initial check
     toggleRecurringFields();
     
-    // Add event listener
     recurringCheckbox.addEventListener('change', toggleRecurringFields);
     
-    // Initialize date picker
     const dueDateField = document.querySelector('#id_due_date');
     if (dueDateField) {
         dueDateField.type = 'date';
         
-        // Set minimum date to today
         const today = new Date().toISOString().split('T')[0];
         dueDateField.min = today;
     }
