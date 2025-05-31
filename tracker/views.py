@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login, authenticate
-from .forms import SignUpForm, TransactionForm, CategoryForm, BudgetForm, GoalForm, BillForm, NotificationPreferenceForm
+from .forms import SignUpForm, TransactionForm, CategoryForm, BudgetForm, GoalForm, BillForm, NotificationPreferenceForm, GoalDepositForm
 from .models import Transaction, Category, Budget, Goal, Bill, Notification, NotificationPreference
 from django.db.models import Sum
 from django.utils import timezone
@@ -18,6 +18,8 @@ from .utils import check_budget_alerts, check_goal_alerts, check_bill_reminders
 from django.contrib import messages
 import logging
 from .mining import detect_spending_patterns
+from django.core.exceptions import ValidationError
+
 
 def signup(request):
     if request.method == 'POST':
@@ -198,8 +200,44 @@ def add_goal(request):
 
 @login_required
 def goal_list(request):
-    goals = Goal.objects.filter(user=request.user)
+    goals = Goal.objects.filter(user=request.user).order_by('-created_at')
     return render(request, 'tracker/goal_list.html', {'goals': goals})
+
+@login_required
+def add_goal_deposit(request, goal_id):
+    goal = get_object_or_404(Goal, id=goal_id, user=request.user)
+    
+    if not goal.can_add_deposit():
+        messages.error(request, "Cannot add deposit - goal already completed!")
+        return redirect('goals')
+    
+    if request.method == 'POST':
+        form = GoalDepositForm(request.POST, goal=goal)
+        if form.is_valid():
+            deposit = form.save(commit=False)
+            deposit.goal = goal
+            try:
+                deposit.save()
+                messages.success(request, f'Deposit of Rs {deposit.amount} added to {goal.name}')
+                return redirect('goals')
+            except ValidationError as e:
+                messages.error(request, str(e))
+    else:
+        form = GoalDepositForm(goal=goal)
+    
+    return render(request, 'tracker/add_deposit.html', {
+        'form': form,
+        'goal': goal
+    })
+
+@login_required
+def goal_deposit_history(request, goal_id):
+    goal = get_object_or_404(Goal, id=goal_id, user=request.user)
+    deposits = goal.deposits.all().order_by('-deposit_date')
+    return render(request, 'tracker/deposit_history.html', {
+        'goal': goal,
+        'deposits': deposits
+    })
 
 @login_required
 def reports(request):
@@ -210,29 +248,25 @@ def chart_data(request):
     time_range = request.GET.get('range', 'monthly')
     user = request.user
     
-    # Calculate date range
     today = datetime.now().date()
     if time_range == 'yearly':
         start_date = today - timedelta(days=365)
     elif time_range == 'quarterly':
         start_date = today - timedelta(days=90)
-    else:  # monthly
+    else:  
         start_date = today - timedelta(days=30)
     
-    # Monthly income vs expenses
     transactions = Transaction.objects.filter(
         user=user,
         date__range=[start_date, today]
     ).values('date', 'category__category_type').annotate(amount=Sum('amount'))
     
-    # Expense by category
     expenses = Transaction.objects.filter(
         user=user,
         category__category_type='EX',
         date__range=[start_date, today]
     ).values('category__name').annotate(total=Sum('amount')).order_by('-total')
     
-    # Income by category
     incomes = Transaction.objects.filter(
         user=user,
         category__category_type='IN', 
@@ -459,10 +493,8 @@ def calculate_next_due_date(current_date, frequency):
 @login_required
 def notifications(request):
     if request.method == 'POST':
-        # Handle any form submissions here if needed
         pass
     
-    # Check for new alerts
     check_budget_alerts(request.user)
     check_goal_alerts(request.user)
     check_bill_reminders(request.user)
@@ -488,10 +520,8 @@ logger = logging.getLogger(__name__)
 def clear_notifications(request):
     if request.method == 'POST':
         try:
-            # Get count before deletion for message
             count = Notification.objects.filter(user=request.user).count()
             
-            # Perform deletion
             Notification.objects.filter(user=request.user).delete()
             
             messages.success(request, f"Successfully deleted {count} notifications")

@@ -28,6 +28,8 @@ urlpatterns = [
     path('goals/add/', views.add_goal, name='add_goal'),
     path('goals/edit/<int:pk>/', views.edit_goal, name='edit_goal'),
     path('goals/delete/<int:pk>/', views.delete_goal, name='delete_goal'),
+    path('goals/<int:goal_id>/deposit/', views.add_goal_deposit, name='add_goal_deposit'),
+    path('goals/<int:goal_id>/history/', views.goal_deposit_history, name='goal_deposit_history'),
 
     path('reports/', views.reports, name='reports'),
     path('api/chart-data/', chart_data, name='chart_data'),

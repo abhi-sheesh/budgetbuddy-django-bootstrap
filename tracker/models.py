@@ -60,12 +60,39 @@ class Goal(models.Model):
     current_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     target_date = models.DateField()
     completed = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.name} - {self.current_amount}/{self.target_amount}"
+        return f"{self.name} - Rs {self.current_amount}/Rs {self.target_amount}"
 
     def progress(self):
         return (self.current_amount / self.target_amount) * 100 if self.target_amount else 0
+
+    def can_add_deposit(self):
+        return not self.completed and self.current_amount < self.target_amount
+
+    @property
+    def remaining_amount(self):
+        return max(self.target_amount - self.current_amount, 0)
+    
+    def can_add_deposit(self):
+        return not self.completed and self.remaining_amount > 0
+
+class GoalDeposit(models.Model):
+    goal = models.ForeignKey(Goal, on_delete=models.CASCADE, related_name='deposits')
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    deposit_date = models.DateField(default=timezone.now)
+    notes = models.TextField(blank=True)
+
+    def save(self, *args, **kwargs):
+        if not self.goal.can_add_deposit():
+            raise ValidationError("Cannot add deposit to completed goal")
+
+        super().save(*args, **kwargs)
+        self.goal.current_amount += self.amount
+        if self.goal.current_amount >= self.goal.target_amount:
+            self.goal.completed = True
+        self.goal.save()
 
 class Notification(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)

@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="container">
+    {% if not goal.can_add_deposit %}
+    <div class="alert alert-danger">
+        <i class="bi bi-exclamation-triangle"></i>
+        This goal has already been completed. You cannot add more deposits.
+    </div>
+    {% endif %}
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Add Deposit to {{ goal.name }}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="progress" style="height: 20px;">
+                            <div class="progress-bar {% if goal.completed %}bg-success{% else %}bg-primary{% endif %}" 
+                                style="width: {{ goal.progress }}%">
+                                {{ goal.progress|floatformat:0 }}%
+                            </div>
+                        </div>
+                        <small class="text-muted">
+                            Current: Rs {{ goal.current_amount|floatformat:2 }} | 
+                            Remaining: Rs {{ goal.remaining_amount|floatformat:2 }}
+                        </small>
+                    </div>              
+
+                    <form method="post">
+                        {% csrf_token %}
+                        {{ form|crispy }}
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-3">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-save"></i> Add Deposit
+                            </button>
+                            <a href="{% url 'goals' %}" class="btn btn-secondary">
+                                <i class="bi bi-x-circle"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

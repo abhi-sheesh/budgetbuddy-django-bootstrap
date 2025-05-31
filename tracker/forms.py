@@ -1,5 +1,5 @@
 from django import forms
-from .models import Transaction, Category, Budget, Goal, Bill, NotificationPreference
+from .models import Transaction, Category, Budget, Goal, Bill, NotificationPreference, GoalDeposit
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 
@@ -12,10 +12,9 @@ class SignUpForm(UserCreationForm):
 
 class TransactionForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
-        user = kwargs.pop('user', None)  # Remove 'user' from kwargs
+        user = kwargs.pop('user', None) 
         super().__init__(*args, **kwargs)
         
-        # Filter categories by user if user is provided
         if user:
             self.fields['category'].queryset = Category.objects.filter(user=user)
     
@@ -33,11 +32,10 @@ class CategoryForm(forms.ModelForm):
 
 class BudgetForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
-        self.user = kwargs.pop('user', None)  # Remove user from kwargs
+        self.user = kwargs.pop('user', None)  
         super().__init__(*args, **kwargs)
         
         if self.user:
-            # Filter categories by user
             self.fields['category'].queryset = Category.objects.filter(user=self.user, category_type = 'EX')
             
     class Meta:
@@ -56,8 +54,49 @@ class GoalForm(forms.ModelForm):
             'target_date': forms.DateInput(attrs={'type': 'date'}),
         }
 
-from django import forms
-from .models import Bill
+class GoalDepositForm(forms.ModelForm):
+    class Meta:
+        model = GoalDeposit
+        fields = ['amount', 'deposit_date', 'notes']
+        widgets = {
+            'deposit_date': forms.DateInput(attrs={'type': 'date'}),
+            'amount': forms.NumberInput(attrs={
+                'min': '0.01',
+                'step': '0.01',
+                'max': ''  # Will be set in __init__
+            })
+        }
+
+    def __init__(self, *args, **kwargs):
+        self.goal = kwargs.pop('goal', None)
+        super().__init__(*args, **kwargs)
+        
+        if self.goal:
+            remaining = self.goal.target_amount - self.goal.current_amount
+            self.fields['amount'].widget.attrs['max'] = f"{remaining:.2f}"
+
+    def clean_amount(self):
+        amount = self.cleaned_data.get('amount')
+        if not self.goal:
+            return amount
+            
+        if amount <= 0:
+            raise forms.ValidationError("Deposit amount must be positive")
+            
+        remaining = self.goal.target_amount - self.goal.current_amount
+        if amount > remaining:
+            raise forms.ValidationError(
+                f"Amount exceeds remaining goal need by ₹{(amount - remaining):.2f}. "
+                f"Maximum deposit: ₹{remaining:.2f}"
+            )
+        return amount
+
+    def clean(self):
+        cleaned_data = super().clean()
+        if self.goal and not self.goal.can_add_deposit():
+            raise forms.ValidationError("Cannot add deposit to completed goal")
+        return cleaned_data
+
 
 class BillForm(forms.ModelForm):
     class Meta:

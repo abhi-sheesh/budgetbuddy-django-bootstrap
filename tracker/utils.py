@@ -10,7 +10,6 @@ def should_send_notification(notification_type, user, message):
         'BILL': timedelta(days=1)
     }.get(notification_type, timedelta(days=1))
     
-    # Check if similar active notification exists
     existing = Notification.objects.filter(
         user=user,
         notification_type=notification_type,
@@ -46,7 +45,7 @@ def check_budget_alerts(user):
         if progress >= 90:
             create_notification(
                 user,
-                f"Budget for {budget.category} is at {progress}%",
+                f"Budget for {budget.category} is at {progress:.2f}%",
                 'BUDGET',
                 'DAILY' if progress >= 95 else 'WEEKLY'
             )
