@@ -19,6 +19,7 @@ from django.contrib import messages
 import logging
 from .mining import detect_spending_patterns
 from django.core.exceptions import ValidationError
+from dateutil.relativedelta import relativedelta
 
 
 def signup(request):
@@ -396,7 +397,6 @@ def mark_paid(request, bill_id):
     bill.is_paid = True
     bill.save()
     
-    # Create a transaction record if needed
     if request.POST.get('create_transaction'):
         Transaction.objects.create(
             user=request.user,
@@ -434,6 +434,17 @@ def delete_bill(request, bill_id):
     
     return render(request, 'tracker/delete_bill.html', {'bill': bill})
 
+@login_required
+def delete_bill_from_history(request, bill_id):
+    bill = get_object_or_404(Bill, id=bill_id, user=request.user)
+    
+    if request.method == 'POST':
+        bill.delete()
+        messages.success(request, "Bill deleted successfully!")
+        return redirect('bill_history')
+    
+    return render(request, 'tracker/delete_bill_history.html', {'bill': bill})
+
 def notifications(request):
     notifications = Notification.objects.filter(user=request.user)
     unread = notifications.filter(is_read=False)
@@ -446,8 +457,19 @@ def notifications(request):
 
 @login_required
 def bill_list(request):
+    bills = Bill.objects.filter(
+        user=request.user,
+        is_paid = False,
+        recurring = False
+    ).order_by('due_date')
+
     bills = Bill.objects.filter(user=request.user).order_by('due_date')
     return render(request, 'tracker/bill_list.html', {'bills': bills})
+
+@login_required
+def bill_history(request):
+    all_bills = Bill.objects.filter(user=request.user).order_by('-due_date')
+    return render(request, 'tracker/bill_history.html', {'bills': all_bills})
 
 @login_required
 def add_bill(request):
@@ -476,18 +498,19 @@ def mark_bill_paid(request, bill_id):
             amount=bill.amount,
             due_date=new_due_date,
             recurring=True,
-            recurring_frequency=bill.recurring_frequency
+            recurring_frequency=bill.recurring_frequency,
+            is_paid=False 
         )
     
     return redirect('bill_list')
 
 def calculate_next_due_date(current_date, frequency):
     if frequency == 'WEEKLY':
-        return current_date + timezone.timedelta(weeks=1)
+        return current_date + timedelta(weeks=1)
     elif frequency == 'MONTHLY':
-        return current_date + timezone.timedelta(days=30)
+        return current_date + relativedelta(months=1)
     elif frequency == 'YEARLY':
-        return current_date + timezone.timedelta(days=365)
+        return current_date + relativedelta(years=1)
     return current_date
 
 @login_required

@@ -8,26 +8,38 @@
             <i class="bi bi-plus"></i> Add Bill
         </a>
     </div>
-
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <a href="{% url 'bill_history' %}" class="btn btn-primary">
+            <i class="bi bi-clock-history"></i> Bills History
+        </a>
+    </div>
     <div class="card">
         <div class="card-body">
-            <table class="table">
+           <table class="table">
                 <thead>
                     <tr>
                         <th>Name</th>
                         <th>Amount</th>
                         <th>Due Date</th>
+                        <th>Recurring</th>
                         <th>Status</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody>         
                     {% for bill in bills %}
-                    {% if not bill.is_paid or not bill.recurring %}
+                   {% if not bill.is_paid or not bill.recurring %}  <!-- Only show unpaid or non-recurring bills -->
                     <tr class="{% if not bill.is_paid and bill.due_date < today %}table-danger{% elif not bill.is_paid %}table-warning{% endif %}">
                         <td>{{ bill.name }}</td>
                         <td>Rs {{ bill.amount }}</td>
                         <td>{{ bill.due_date }}</td>
+                        <td>
+                            {% if bill.recurring %}
+                                <span class="badge bg-info text-dark">{{ bill.get_recurring_frequency_display }}</span>
+                            {% else %}
+                                <span class="badge bg-secondary">One-time</span>
+                           {% endif %}
+                        </td> 
                         <td>
                             {% if bill.is_paid %}
                                 <span class="badge bg-success">Paid</span>
@@ -41,11 +53,8 @@
                                     Mark Paid
                                 </a>
                             {% endif %}
-                        </td>
-                        <td>
                             <a href="{% url 'edit_bill' bill.id %}" class="btn btn-sm btn-outline-primary">Edit</a>
                             <a href="{% url 'delete_bill' bill.id %}" class="btn btn-sm btn-outline-danger">Delete</a>
-                        </td>
                     </tr>
                     {% endif %}
                     {% empty %}

@@ -63,7 +63,7 @@ class GoalDepositForm(forms.ModelForm):
             'amount': forms.NumberInput(attrs={
                 'min': '0.01',
                 'step': '0.01',
-                'max': ''  # Will be set in __init__
+                'max': ''  
             })
         }
 

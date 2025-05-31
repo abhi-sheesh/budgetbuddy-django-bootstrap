@@ -1,7 +1,7 @@
 from django.urls import path
 from . import views
 from django.contrib.auth.decorators import login_required
-from .views import reports, chart_data, bill_list, add_bill, mark_bill_paid, notifications, mark_notification_read, clear_notifications, notification_settings
+from .views import reports, chart_data, bill_list, add_bill, mark_bill_paid, notifications, mark_notification_read, clear_notifications, notification_settings, bill_history
 
 urlpatterns = [
     path('', views.dashboard, name='dashboard'),
@@ -39,6 +39,8 @@ urlpatterns = [
     path('bills/<int:bill_id>/paid/', mark_bill_paid, name='mark_bill_paid'),
     path('bills/<int:bill_id>/edit/', views.edit_bill, name='edit_bill'),
     path('bills/<int:bill_id>/delete/', views.delete_bill, name='delete_bill'),
+    path('bills/history/', bill_history, name='bill_history'),
+    path('bills/<int:bill_id>/delete_bill_history/', views.delete_bill_from_history, name='delete_bill_from_history'),
 
     path('notifications/', notifications, name='notifications'),
     path('notifications/<int:notification_id>/read/', mark_notification_read, name='mark_notification_read'),

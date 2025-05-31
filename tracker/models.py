@@ -38,7 +38,7 @@ class Budget(models.Model):
             raise ValidationError("Budgeting can only be applied to expense categories")
 
     def save(self, *args, **kwargs):
-        self.full_clean()  # Runs clean() validation
+        self.full_clean()  
         super().save(*args, **kwargs)
 
     def __str__(self):
