@@ -45,7 +45,7 @@ def check_budget_alerts(user):
         if progress >= 90:
             create_notification(
                 user,
-                f"Budget for {budget.category} is at {progress:.2f}%",
+                f"Budget for {budget.category} is at {progress}%",
                 'BUDGET',
                 'DAILY' if progress >= 95 else 'WEEKLY'
             )
