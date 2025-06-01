@@ -5,6 +5,7 @@ in command line:
 2. activate venv [venv/Scripts/activate on windows powershell, Source venv/bin/activate on linux]
 
 pip install django
+pip install scikitlearn
 
 django manage.py runserver (will run at port 8000 default)
 

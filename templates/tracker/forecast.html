@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <h2>Expense Forecast</h2>
+    
+    {% if forecast %}
+    <div class="card">
+        <div class="card-body">
+            <canvas id="forecastChart"></canvas>
+        </div>
+    </div>
+    
+    <table class="table mt-4">
+        <thead>
+            <tr>
+                <th>Month</th>
+                <th>Predicted Amount</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for prediction in forecast %}
+            <tr>
+                <td>{{ prediction.month }}</td>
+                <td>Rs {{ prediction.predicted_amount|floatformat:2 }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    <script>
+        const ctx = document.getElementById('forecastChart').getContext('2d');
+        const forecastData = {
+            labels: [
+                {% for prediction in forecast %}
+                    "{{ prediction.month }}"{% if not forloop.last %},{% endif %}
+                {% endfor %}
+            ],
+            datasets: [{
+                label: 'Predicted Expenses',
+                data: [
+                    {% for prediction in forecast %}
+                        {{ prediction.predicted_amount }}{% if not forloop.last %},{% endif %}
+                    {% endfor %}
+                ],
+                borderColor: 'rgb(75, 192, 192)',
+                tension: 0.1
+            }]
+        };
+        
+        new Chart(ctx, {
+            type: 'line',
+            data: forecastData,
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return 'Rs ' + value;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+    {% else %}
+    <div class="alert alert-info">
+        Not enough historical data to generate forecast. Please check back after more transactions.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
