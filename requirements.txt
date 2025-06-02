@@ -7,6 +7,6 @@ in command line:
 pip install django
 pip install scikitlearn
 
-django manage.py runserver (will run at port 8000 default)
+django manage.py runserver (will run at port 8000 default but specify port if necessary like 8001)
 
 install necessary libraries
