@@ -8,6 +8,8 @@ pip install django
 
 You sent
 pip install django-crispy-forms
+pip install crispy-bootstrap5
+
 pip install scikit-learn
 pip install numpy
 pip install django-filter
