@@ -9,10 +9,11 @@ pip install django
 You sent
 pip install django-crispy-forms
 pip install crispy-bootstrap5
+pip install django-filter
 
 pip install scikit-learn
 pip install numpy
-pip install django-filter
+
 
 django manage.py runserver (will run at port 8000 default but specify port if necessary like 8001)
 
