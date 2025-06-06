@@ -11,6 +11,7 @@ pip install django-crispy-forms
 pip install crispy-bootstrap5
 pip install django-filter
 pip install django-chartjs
+pip install django-tables2
 
 pip install scikit-learn
 pip install numpy
