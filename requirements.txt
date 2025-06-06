@@ -5,6 +5,9 @@ in command line:
 2. activate venv [venv/Scripts/activate on windows powershell, Source venv/bin/activate on linux]
 
 pip install django
+
+You sent
+pip install django-crispy-forms
 pip install scikit-learn
 pip install numpy
 pip install django-filter
