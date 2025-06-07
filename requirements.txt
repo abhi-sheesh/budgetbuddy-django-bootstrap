@@ -14,8 +14,9 @@ pip install django-chartjs
 pip install django-tables2
 
 pip install scikit-learn
+pip install pandas
 
 
 python manage.py runserver (will run at port 8000 default but specify port if necessary like 8001)
 
-install necessary libraries
+install remaining necessary libraries
