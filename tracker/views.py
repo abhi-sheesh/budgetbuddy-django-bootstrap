@@ -370,15 +370,15 @@ def delete_goal(request, pk):
         return redirect('goals')
     return render(request, 'tracker/delete_goal.html', {'goal': goal})
 
-@login_required
-def edit_transaction(request, pk):
-    transaction = get_object_or_404(Transaction, pk=pk, user=request.user)
-    if request.method == 'POST':
-        form = TransactionForm(request.POST, instance=transaction, user=request.user)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'Transaction updated successfully!')
-            return redirect('transactions')
+# @login_required
+# def edit_transaction(request, pk):
+#     transaction = get_object_or_404(Transaction, pk=pk, user=request.user)
+#     if request.method == 'POST':
+#         form = TransactionForm(request.POST, instance=transaction, user=request.user)
+#         if form.is_valid():
+#             form.save()
+#             messages.success(request, 'Transaction updated successfully!')
+#             return redirect('transactions')
 
 def bills(request):
     bills = Bill.objects.filter(user=request.user).order_by('due_date')
