@@ -4,73 +4,117 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BudgetBuddy{% block title %}{% endblock %}</title>
+    <title>BudgetBuddy</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     {% block extra_css %}{% endblock %}
 </head>
 <body>
     {% csrf_token %}
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <div class="container">
-            <a class="navbar-brand" href="{% url 'dashboard' %}">BudgetBuddy</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'dashboard' %}">Dashboard</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'transactions' %}">Transactions</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'incomes' %}">Incomes</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'expenses' %}">Expenses</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'categories' %}">Categories</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'budgets' %}">Budgets</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'goals' %}">Goals</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'bill_list' %}">Bills</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'reports' %}"><i class="bi bi-graph-up"></i> Reports</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'spending_patterns' %}">
-                            Patterns
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link position-relative" href="{% url 'notifications' %}">
-                            <i class="bi bi-bell"></i>
-                            {% if unread_notifications_count > 0 %}
-                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                                    {{ unread_notifications_count }}
-                                <span class="visually-hidden">unread notifications</span>
-                            </span>
-                            {% endif %}
-                        </a>
-                    </li>
-                </ul>
-                <ul class="navbar-nav">
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'logout' %}">Logout</a>
-                    </li>
-                </ul
-            </div>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+    <div class="container">
+        <a class="navbar-brand fw-bold fs-4" href="{% url 'dashboard' %}">BudgetBuddy</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" 
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+        <!-- Left nav links -->
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item">
+            <a class="nav-link fs-5 py-2 px-3 {% if request.resolver_match.url_name == 'transactions' %}active{% endif %}" 
+                href="{% url 'transactions' %}" aria-current="{% if request.resolver_match.url_name == 'transactions' %}page{% endif %}">
+                Transactions
+            </a>
+            </li>
+            <li class="nav-item">
+            <a class="nav-link fs-5 py-2 px-3 {% if request.resolver_match.url_name == 'incomes' %}active{% endif %}" 
+                href="{% url 'incomes' %}" aria-current="{% if request.resolver_match.url_name == 'incomes' %}page{% endif %}">
+                Incomes
+            </a>
+            </li>
+            <li class="nav-item">
+            <a class="nav-link fs-5 py-2 px-3 {% if request.resolver_match.url_name == 'expenses' %}active{% endif %}" 
+                href="{% url 'expenses' %}" aria-current="{% if request.resolver_match.url_name == 'expenses' %}page{% endif %}">
+                Expenses
+            </a>
+            </li>
+            <li class="nav-item">
+            <a class="nav-link fs-5 py-2 px-3 {% if request.resolver_match.url_name == 'categories' %}active{% endif %}" 
+                href="{% url 'categories' %}" aria-current="{% if request.resolver_match.url_name == 'categories' %}page{% endif %}">
+                Categories
+            </a>
+            </li>
+            <li class="nav-item">
+            <a class="nav-link fs-5 py-2 px-3 {% if request.resolver_match.url_name == 'budgets' %}active{% endif %}" 
+                href="{% url 'budgets' %}" aria-current="{% if request.resolver_match.url_name == 'budgets' %}page{% endif %}">
+                Budgets
+            </a>
+            </li>
+            <li class="nav-item">
+            <a class="nav-link fs-5 py-2 px-3 {% if request.resolver_match.url_name == 'goals' %}active{% endif %}" 
+                href="{% url 'goals' %}" aria-current="{% if request.resolver_match.url_name == 'goals' %}page{% endif %}">
+                Goals
+            </a>
+            </li>
+            <li class="nav-item">
+            <a class="nav-link fs-5 py-2 px-3 {% if request.resolver_match.url_name == 'bill_list' %}active{% endif %}" 
+                href="{% url 'bill_list' %}" aria-current="{% if request.resolver_match.url_name == 'bill_list' %}page{% endif %}">
+                Bills
+            </a>
+            </li>
+            <li class="nav-item">
+            <a class="nav-link d-flex align-items-center fs-5 py-2 px-3 {% if request.resolver_match.url_name == 'reports' %}active{% endif %}" 
+                href="{% url 'reports' %}" aria-current="{% if request.resolver_match.url_name == 'reports' %}page{% endif %}">
+                Reports
+            </a>
+            </li>
+            <li class="nav-item">
+            <a class="nav-link fs-5 py-2 px-3 {% if request.resolver_match.url_name == 'spending_patterns' %}active{% endif %}" 
+                href="{% url 'spending_patterns' %}" aria-current="{% if request.resolver_match.url_name == 'spending_patterns' %}page{% endif %}">
+                Patterns
+            </a>
+            </li>
+
+            <!-- Notifications -->
+            <li class="nav-item position-relative">
+            <a class="nav-link fs-5 py-2 px-3 {% if request.resolver_match.url_name == 'notifications' %}active{% endif %}" href="{% url 'notifications' %}" aria-label="Notifications">
+                <i class="bi bi-bell fs-4" aria-hidden="true"></i>
+                <span class="visually-hidden">Notifications</span>
+                {% if unread_notifications_count > 0 %}
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                {{ unread_notifications_count }}
+                <span class="visually-hidden">unread notifications</span>
+                </span>
+                {% endif %}
+            </a>
+            </li>
+        </ul>
+
+        <!-- User dropdown with logout -->
+        <ul class="navbar-nav ms-3">
+            <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle fs-5 py-2 px-3" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-person-circle fs-4 me-1"></i> 
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                <li><a class="dropdown-item" href="{% url 'notification_settings' %}"><i class="bi bi-gear"></i> Settings</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li>
+                <form method="post" action="{% url 'logout' %}" class="m-0 p-0">
+                    {% csrf_token %}
+                    <button type="submit" class="dropdown-item text-danger fw-semibold"><i class="bi bi-box-arrow-right"></i> Logout</button>
+                </form>
+                </li>
+            </ul>
+            </li>
+        </ul>
+
         </div>
+    </div>
     </nav>
+
 
     <div class="container mt-4">
         {% if messages %}

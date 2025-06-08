@@ -4,9 +4,9 @@
 <div class="container">
     <h2 class="my-4">Bill History</h2>
     <div>
-            <a href="{% url 'delete_bill_history' %}" class="btn btn-outline-danger">
+            {% comment %} <a href="{% url 'delete_bill_history' %}" class="btn btn-outline-danger">
                 <i class="bi bi-trash"></i> Clear History
-            </a>
+            </a> {% endcomment %}
             <a href="{% url 'bill_list' %}" class="btn btn-outline-secondary">
                 <i class="bi bi-arrow-left"></i> Back to Bills
             </a>

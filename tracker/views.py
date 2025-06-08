@@ -562,7 +562,7 @@ def notification_settings(request):
         form = NotificationPreferenceForm(request.POST, instance=prefs)
         if form.is_valid():
             form.save()
-            return redirect('notifications')
+            return redirect('dashboard')
     else:
         form = NotificationPreferenceForm(instance=prefs)
     

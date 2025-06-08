@@ -15,30 +15,33 @@
 {% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-md-4">
-        <div class="card">
-            <div class="card-header bg-primary text-white">
-                <h5 class="card-title">Monthly Summary</h5>
-            </div>
-            <div class="card-body">
-                <div class="mb-3">
-                    <h6>Income</h6>
-                    <h4 class="text-success">Rs {{ income|intcomma }}</h4>
-                </div>
-                <div class="mb-3">
-                    <h6>Expenses</h6>
-                    <h4 class="text-danger">Rs {{ expenses|intcomma }}</h4>
-                </div>
-                <div>
-                    <h6>Savings</h6>
-                    <h4 class="text-{% if savings >= 0 %}success{% else %}danger{% endif %}">Rs {{ savings|intcomma }}</h4>
-                </div>
+<div class="container py-4">
+    <div class="text-center mb-4">
+        <h4 class="fw-bold text-primary"> Monthly Summary</h4>
+    </div>
+
+    <div class="row justify-content-center text-center overflow-hidden rounded-4 shadow-sm">
+        <div class="col-4 bg-success bg-opacity-10 py-4 border-end">
+            <div class="text-success fw-semibold mb-1">Income</div>
+            <div class="text-success fw-bold fs-5">Rs {{ income|intcomma }}</div>
+        </div>
+
+        <div class="col-4 bg-danger bg-opacity-10 py-4 border-end">
+            <div class="text-danger fw-semibold mb-1">Expenses</div>
+            <div class="text-danger fw-bold fs-5">Rs {{ expenses|intcomma }}</div>
+        </div>
+
+        <div class="col-4 bg-primary bg-opacity-10 py-4">
+            <div class="text-primary fw-semibold mb-1">Balance</div>
+            <div class="fw-bold fs-5 text-{% if savings >= 0 %}success{% else %}danger{% endif %}">
+                Rs {{ savings|intcomma }}
             </div>
         </div>
     </div>
-    
-    <div class="col-md-5">
+</div>
+
+<div class="row">
+    <div class="col-md-6">
         <div class="card">
             <div class="card-header bg-primary text-white">
                 <h5 class="card-title">Expense Breakdown</h5>
@@ -48,37 +51,6 @@
             </div>
         </div>
     </div>
-</div>
-
-<div class="row mt-4">
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-header bg-primary text-white">
-                <h5 class="card-title">Recent Transactions</h5>
-            </div>
-            <div class="card-body">
-                <div class="list-group">
-                    {% for transaction in recent_transactions %}
-                    <div class="list-group-item">
-                        <div class="d-flex w-100 justify-content-between">
-                            <h6 class="mb-1">{{ transaction.category }}</h6>
-                            <small>{{ transaction.date }}</small>
-                        </div>
-                        <p class="mb-1">{{ transaction.description|default:"No description" }}</p>
-                        <span class="badge bg-{% if transaction.category.category_type == 'IN' %}success{% else %}danger{% endif %} rounded-pill">
-                            Rs {{ transaction.amount|intcomma }}
-                        </span>
-                    </div>
-                    {% empty %}
-                    <div class="list-group-item">
-                        No transactions yet.
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
-        </div>
-    </div>
-    
     <div class="col-md-6">
         <div class="card">
             <div class="card-header bg-primary text-white">
@@ -106,6 +78,39 @@
             </div>
         </div>
     </div>
+
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="card-title">Recent Transactions</h5>
+            </div>
+            <div class="card-body">
+                <div class="list-group">
+                    {% for transaction in recent_transactions %}
+                    <div class="list-group-item">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">{{ transaction.category }}</h6>
+                            <small>{{ transaction.date }}</small>
+                        </div>
+                        <p class="mb-1">{{ transaction.description|default:"No description" }}</p>
+                        <span class="badge bg-{% if transaction.category.category_type == 'IN' %}success{% else %}danger{% endif %} rounded-pill">
+                            Rs {{ transaction.amount|intcomma }}
+                        </span>
+                    </div>
+                    {% empty %}
+                    <div class="list-group-item">
+                        No transactions yet.
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    
 </div>
 
 <div class="row mt-4">
