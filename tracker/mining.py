@@ -60,7 +60,7 @@ def detect_spending_patterns(user):
 
 def predict_future_expenses(user, months=3):
     end_date = timezone.now().date()
-    start_date = end_date - timedelta(days=365)
+    start_date = end_date - relativedelta(years=1)
     
     daily_expenses = Transaction.objects.filter(
         user=user,
