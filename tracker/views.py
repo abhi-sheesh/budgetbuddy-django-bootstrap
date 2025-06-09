@@ -17,7 +17,7 @@ import json
 from .utils import check_budget_alerts, check_goal_alerts, check_bill_reminders
 from django.contrib import messages
 import logging
-from .mining import detect_spending_patterns
+from .mining import detect_spending_patterns, predict_future_expenses
 from django.core.exceptions import ValidationError
 from dateutil.relativedelta import relativedelta
 
@@ -545,3 +545,9 @@ def notification_settings(request):
 def spending_patterns(request):
     patterns = detect_spending_patterns(request.user)
     return render(request, 'tracker/patterns.html', {'patterns': patterns})
+
+
+@login_required
+def expense_forecast(request):
+    forecast = predict_future_expenses(request.user)
+    return render(request, 'tracker/forecast.html', {'forecast': forecast})

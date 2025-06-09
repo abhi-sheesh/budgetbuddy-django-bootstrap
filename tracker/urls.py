@@ -49,4 +49,5 @@ urlpatterns = [
     path('settings/', notification_settings, name='notification_settings'),
 
     path('patterns/', views.spending_patterns, name='spending_patterns'),
+    path('forecast/', views.expense_forecast, name='expense_forecast'),
 ]

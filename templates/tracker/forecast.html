@@ -30,24 +30,6 @@
     
     <script>
         const ctx = document.getElementById('forecastChart').getContext('2d');
-        const forecastData = {
-            labels: [
-                {% for prediction in forecast %}
-                    "{{ prediction.month }}"{% if not forloop.last %},{% endif %}
-                {% endfor %}
-            ],
-            datasets: [{
-                label: 'Predicted Expenses',
-                data: [
-                    {% for prediction in forecast %}
-                        {{ prediction.predicted_amount }}{% if not forloop.last %},{% endif %}
-                    {% endfor %}
-                ],
-                borderColor: 'rgb(75, 192, 192)',
-                tension: 0.1
-            }]
-        };
-        
         new Chart(ctx, {
             type: 'line',
             data: forecastData,

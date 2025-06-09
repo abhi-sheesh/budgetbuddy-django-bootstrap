@@ -14,70 +14,74 @@
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
     <div class="container">
         <a class="navbar-brand fw-bold fs-4" href="{% url 'dashboard' %}">BudgetBuddy</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" 
-                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" 
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
         </button>
 
         <div class="collapse navbar-collapse" id="navbarNav">
-        <!-- Left nav links -->
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
             <li class="nav-item">
-            <a class="nav-link fs-5 py-2 px-3 {% if request.resolver_match.url_name == 'transactions' %}active{% endif %}" 
-                href="{% url 'transactions' %}" aria-current="{% if request.resolver_match.url_name == 'transactions' %}page{% endif %}">
-                Transactions
-            </a>
+                <a class="nav-link fs-5 py-2 px-3 {% if request.resolver_match.url_name == 'transactions' %}active{% endif %}" 
+                    href="{% url 'transactions' %}" aria-current="{% if request.resolver_match.url_name == 'transactions' %}page{% endif %}">
+                    Transactions
+                </a>
             </li>
             <li class="nav-item">
-            <a class="nav-link fs-5 py-2 px-3 {% if request.resolver_match.url_name == 'incomes' %}active{% endif %}" 
-                href="{% url 'incomes' %}" aria-current="{% if request.resolver_match.url_name == 'incomes' %}page{% endif %}">
-                Incomes
-            </a>
+                <a class="nav-link fs-5 py-2 px-3 {% if request.resolver_match.url_name == 'incomes' %}active{% endif %}" 
+                    href="{% url 'incomes' %}" aria-current="{% if request.resolver_match.url_name == 'incomes' %}page{% endif %}">
+                    Incomes
+                </a>
             </li>
             <li class="nav-item">
-            <a class="nav-link fs-5 py-2 px-3 {% if request.resolver_match.url_name == 'expenses' %}active{% endif %}" 
-                href="{% url 'expenses' %}" aria-current="{% if request.resolver_match.url_name == 'expenses' %}page{% endif %}">
-                Expenses
-            </a>
+                <a class="nav-link fs-5 py-2 px-3 {% if request.resolver_match.url_name == 'expenses' %}active{% endif %}" 
+                    href="{% url 'expenses' %}" aria-current="{% if request.resolver_match.url_name == 'expenses' %}page{% endif %}">
+                    Expenses
+                </a>
             </li>
             <li class="nav-item">
-            <a class="nav-link fs-5 py-2 px-3 {% if request.resolver_match.url_name == 'categories' %}active{% endif %}" 
-                href="{% url 'categories' %}" aria-current="{% if request.resolver_match.url_name == 'categories' %}page{% endif %}">
-                Categories
-            </a>
+                <a class="nav-link fs-5 py-2 px-3 {% if request.resolver_match.url_name == 'categories' %}active{% endif %}" 
+                    href="{% url 'categories' %}" aria-current="{% if request.resolver_match.url_name == 'categories' %}page{% endif %}">
+                    Categories
+                </a>
             </li>
             <li class="nav-item">
-            <a class="nav-link fs-5 py-2 px-3 {% if request.resolver_match.url_name == 'budgets' %}active{% endif %}" 
-                href="{% url 'budgets' %}" aria-current="{% if request.resolver_match.url_name == 'budgets' %}page{% endif %}">
-                Budgets
-            </a>
+                <a class="nav-link fs-5 py-2 px-3 {% if request.resolver_match.url_name == 'budgets' %}active{% endif %}" 
+                    href="{% url 'budgets' %}" aria-current="{% if request.resolver_match.url_name == 'budgets' %}page{% endif %}">
+                    Budgets
+                </a>
             </li>
             <li class="nav-item">
-            <a class="nav-link fs-5 py-2 px-3 {% if request.resolver_match.url_name == 'goals' %}active{% endif %}" 
-                href="{% url 'goals' %}" aria-current="{% if request.resolver_match.url_name == 'goals' %}page{% endif %}">
-                Goals
-            </a>
+                <a class="nav-link fs-5 py-2 px-3 {% if request.resolver_match.url_name == 'goals' %}active{% endif %}" 
+                    href="{% url 'goals' %}" aria-current="{% if request.resolver_match.url_name == 'goals' %}page{% endif %}">
+                    Goals
+                </a>
             </li>
             <li class="nav-item">
-            <a class="nav-link fs-5 py-2 px-3 {% if request.resolver_match.url_name == 'bill_list' %}active{% endif %}" 
-                href="{% url 'bill_list' %}" aria-current="{% if request.resolver_match.url_name == 'bill_list' %}page{% endif %}">
-                Bills
-            </a>
+                <a class="nav-link fs-5 py-2 px-3 {% if request.resolver_match.url_name == 'bill_list' %}active{% endif %}" 
+                    href="{% url 'bill_list' %}" aria-current="{% if request.resolver_match.url_name == 'bill_list' %}page{% endif %}">
+                    Bills
+                </a>
             </li>
             <li class="nav-item">
-            <a class="nav-link d-flex align-items-center fs-5 py-2 px-3 {% if request.resolver_match.url_name == 'reports' %}active{% endif %}" 
-                href="{% url 'reports' %}" aria-current="{% if request.resolver_match.url_name == 'reports' %}page{% endif %}">
-                Reports
-            </a>
+                <a class="nav-link d-flex align-items-center fs-5 py-2 px-3 {% if request.resolver_match.url_name == 'reports' %}active{% endif %}" 
+                    href="{% url 'reports' %}" aria-current="{% if request.resolver_match.url_name == 'reports' %}page{% endif %}">
+                    Reports
+                </a>
             </li>
             <li class="nav-item">
-            <a class="nav-link fs-5 py-2 px-3 {% if request.resolver_match.url_name == 'spending_patterns' %}active{% endif %}" 
-                href="{% url 'spending_patterns' %}" aria-current="{% if request.resolver_match.url_name == 'spending_patterns' %}page{% endif %}">
-                Patterns
-            </a>
+                <a class="nav-link fs-5 py-2 px-3 {% if request.resolver_match.url_name == 'spending_patterns' %}active{% endif %}" 
+                    href="{% url 'spending_patterns' %}" aria-current="{% if request.resolver_match.url_name == 'spending_patterns' %}page{% endif %}">
+                    Patterns
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link fs-5 py-2 px-3 {% if request.resolver_match.url_name == 'spending_patterns' %}active{% endif %}" 
+                    href="{% url 'expense_forecast' %}" aria-current="{% if request.resolver_match.url_name == 'spending_patterns' %}page{% endif %}">
+                    Forecast
+                </a>
             </li>
 
-            <!-- Notifications -->
             <li class="nav-item position-relative">
             <a class="nav-link fs-5 py-2 px-3 {% if request.resolver_match.url_name == 'notifications' %}active{% endif %}" href="{% url 'notifications' %}" aria-label="Notifications">
                 <i class="bi bi-bell fs-4" aria-hidden="true"></i>
@@ -92,7 +96,6 @@
             </li>
         </ul>
 
-        <!-- User dropdown with logout -->
         <ul class="navbar-nav ms-3">
             <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle fs-5 py-2 px-3" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
