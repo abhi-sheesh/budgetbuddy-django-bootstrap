@@ -42,10 +42,11 @@ def check_budget_alerts(user):
     budgets = Budget.objects.filter(user=user)
     for budget in budgets:
         progress = budget.progress()
+        truncated = int(progress*100)/100
         if progress >= 90:
             create_notification(
                 user,
-                f"Budget for {budget.category} is at {progress}%",
+                f"Budget for {budget.category} is at {truncated:.2f}%",
                 'BUDGET',
                 'DAILY' if progress >= 95 else 'WEEKLY'
             )
@@ -54,12 +55,13 @@ def check_goal_alerts(user):
     goals = Goal.objects.filter(user=user, completed=False)
     for goal in goals:
         progress = goal.progress()
+        truncated = int(progress*100)/100
         days_left = (goal.target_date - timezone.now().date()).days
         
         if progress >= 90:
             create_notification(
                 user,
-                f"Goal '{goal.name}' is {progress}% complete!",
+                f"Goal '{goal.name}' is {truncated:.2f}% complete!",
                 'GOAL',
                 'DAILY' if progress >= 95 else 'WEEKLY'
             )

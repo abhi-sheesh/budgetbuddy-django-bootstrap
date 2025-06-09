@@ -20,6 +20,7 @@ import logging
 from .mining import detect_spending_patterns, predict_future_expenses
 from django.core.exceptions import ValidationError
 from dateutil.relativedelta import relativedelta
+from django.db.models.functions import TruncDay, TruncMonth, TruncYear
 
 
 def signup(request):
@@ -331,11 +332,11 @@ def chart_data(request):
     
     today = datetime.now().date()
     if time_range == 'yearly':
-        start_date = today - timedelta(days=365)
+        start_date = today - relativedelta(years=1)
     elif time_range == 'quarterly':
         start_date = today - timedelta(days=90)
     else:  
-        start_date = today - timedelta(days=30)
+        start_date = today - relativedelta(months=1)
     
     transactions = Transaction.objects.filter(
         user=user,
@@ -505,7 +506,14 @@ def notifications(request):
     })
 
 @login_required
-def mark_notification_read(request):
+def mark_notification_read(request, notification_id):
+    notification = Notification.objects.get(id=notification_id, user=request.user)
+    notification.is_read = True
+    notification.save()
+    return redirect('notifications')
+
+@login_required
+def mark_all_notification_read(request):
     notification = Notification.objects.filter(user=request.user, is_read = False)
     if notification:
         notification.update(is_read = True)
@@ -551,3 +559,57 @@ def spending_patterns(request):
 def expense_forecast(request):
     forecast = predict_future_expenses(request.user)
     return render(request, 'tracker/forecast.html', {'forecast': forecast})
+
+@login_required
+def income_expense_comparison(request):
+    time_period = request.GET.get('period', 'monthly') 
+    user = request.user
+    today = timezone.now().date()
+    
+    if time_period == 'daily':
+        trunc_func = TruncDay('date')
+        date_range = today - timedelta(days=30)  
+        date_format = '%b %d'
+    elif time_period == 'yearly':
+        trunc_func = TruncYear('date')
+        date_range = today - relativedelta(years=5)  
+        date_format = '%Y'
+    else: 
+        trunc_func = TruncMonth('date')
+        date_range = today - relativedelta(months=5)  
+        date_format = '%b %Y'
+    
+    transactions = Transaction.objects.filter(
+        user=user,
+        date__gte=date_range
+    ).annotate(
+        period=trunc_func
+    ).values('period', 'category__category_type').annotate(
+        total=Sum('amount')
+    ).order_by('period')
+    
+    periods = []
+    income_data = []
+    expense_data = []
+    
+    unique_periods = sorted(set(t['period'] for t in transactions), reverse=True)[:5]
+    unique_periods.reverse() 
+    
+    for period in unique_periods:
+        period_date = period.date() if hasattr(period, 'date') else period
+        periods.append(period_date.strftime(date_format))
+        
+        income = next((t['total'] for t in transactions 
+                      if t['period'] == period and t['category__category_type'] == 'IN'), 0)
+        expense = next((t['total'] for t in transactions 
+                       if t['period'] == period and t['category__category_type'] == 'EX'), 0)
+        
+        income_data.append(float(income))
+        expense_data.append(float(expense))
+    
+    return JsonResponse({
+        'labels': periods,
+        'income': income_data,
+        'expenses': expense_data,
+        'time_period': time_period
+    })

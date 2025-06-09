@@ -20,20 +20,17 @@
 
 {% block content %}
 <div class="container">
-    <h2 class="my-4">Financial Reports</h2>
-    
-    <div class="btn-group mb-4">
-        <button class="btn time-range-btn active" onclick="updateCharts('monthly')">Monthly</button>
-        <button class="btn time-range-btn" onclick="updateCharts('quarterly')">Quarterly</button>
-        <button class="btn time-range-btn" onclick="updateCharts('yearly')">Yearly</button>
-    </div>
-    
     <div class="card mb-4">
-        <div class="card-header">
-            <h5>Income vs Expenses</h5>
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Income vs Expenses Comparison</h5>
+            <div class="btn-group">
+                <button class="btn btn-sm btn-outline-secondary period-btn active" data-period="daily">Daily</button>
+                <button class="btn btn-sm btn-outline-secondary period-btn" data-period="monthly">Monthly</button>
+                <button class="btn btn-sm btn-outline-secondary period-btn" data-period="yearly">Yearly</button>
+            </div>
         </div>
         <div class="card-body">
-            <div class="chart-container">
+            <div class="chart-container" style="height: 400px;">
                 <canvas id="comparisonChart"></canvas>
             </div>
         </div>
@@ -78,20 +75,21 @@
         green: 'rgba(76, 175, 80, 0.8)',
         red: 'rgba(244, 67, 54, 0.8)',
         yellow: 'rgba(255, 193, 7, 0.8)',
-        text: '#black',
-        grid: 'rgba(255, 255, 255, 0.1)'
+        grid: 'rgba(235, 217, 217, 0.1)'
     };
 
     let comparisonChart, incomeChart, expenseChart;
     
     document.addEventListener('DOMContentLoaded', function() {
-        comparisonChart = new Chart(
-            document.getElementById('comparisonChart').getContext('2d'),
-            {
-                type: 'bar',
-                options: getChartOptions('Income vs Expenses')
-            }
-        );
+        loadComparisonData('daily');
+        
+        document.querySelectorAll('.period-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                loadComparisonData(this.dataset.period);
+            });
+        });
         
         incomeChart = new Chart(
             document.getElementById('incomeChart').getContext('2d'),
@@ -149,7 +147,69 @@
             }
         };
     }
+
+    function loadComparisonData(period) {
+        fetch(`/api/income-expense-comparison/?period=${period}`)
+            .then(response => response.json())
+            .then(data => {
+                updateChart(data);
+            });
+    }
     
+    function updateChart(data) {
+        const ctx = document.getElementById('comparisonChart').getContext('2d');
+        
+        if (comparisonChart) {
+            comparisonChart.destroy();
+        }
+        
+        comparisonChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: data.labels,
+                datasets: [
+                    {
+                        label: 'Income',
+                        data: data.income,
+                        backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Expenses',
+                        data: data.expenses,
+                        backgroundColor: 'rgba(156, 36, 36, 0.7)',
+                        borderColor: 'rgb(190, 60, 60)',
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return 'Rs ' + value;
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.dataset.label + ': Rs ' + context.raw.toFixed(2);
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
     function updateCharts(range) {
         document.querySelectorAll('.time-range-btn').forEach(btn => {
             btn.classList.toggle('active', btn.textContent.toLowerCase() === range);
@@ -158,23 +218,6 @@
         fetch(`/api/chart-data/?range=${range}`)
             .then(response => response.json())
             .then(data => {
-                comparisonChart.data = {
-                    labels: data.monthly.labels,
-                    datasets: [
-                        {
-                            label: 'Income',
-                            data: data.monthly.income,
-                            backgroundColor: colors.green
-                        },
-                        {
-                            label: 'Expenses',
-                            data: data.monthly.expenses,
-                            backgroundColor: colors.red
-                        }
-                    ]
-                };
-                comparisonChart.update();
-                
                 incomeChart.data = {
                     labels: data.income.labels,
                     datasets: [{

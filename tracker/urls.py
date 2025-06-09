@@ -1,7 +1,7 @@
 from django.urls import path
 from . import views
 from django.contrib.auth.decorators import login_required
-from .views import reports, chart_data, bill_list, add_bill, mark_bill_paid, notifications, mark_notification_read, clear_notifications, notification_settings, bill_history
+from .views import reports, chart_data, bill_list, add_bill, mark_bill_paid, notifications, mark_notification_read, mark_all_notification_read, clear_notifications, notification_settings, bill_history
 
 urlpatterns = [
     path('', views.dashboard, name='dashboard'),
@@ -33,6 +33,7 @@ urlpatterns = [
 
     path('reports/', views.reports, name='reports'),
     path('api/chart-data/', chart_data, name='chart_data'),
+    path('api/income-expense-comparison/', views.income_expense_comparison, name='income_expense_comparison'),
 
     path('bills/', bill_list, name='bill_list'),
     path('bills/add/', add_bill, name='add_bill'),
@@ -43,7 +44,8 @@ urlpatterns = [
     path('bills/<int:bill_id>/delete_bill_history/', views.delete_bill_from_history, name='delete_bill_from_history'),
 
     path('notifications/', notifications, name='notifications'),
-    path('notifications/read/', views.mark_notification_read, name='mark_notification_read'),
+    path('notifications/all_read/', views.mark_all_notification_read, name='mark_all_notification_read'),
+    path('notifications/<int:notification_id>/read/', mark_notification_read, name='mark_notification_read'),
     path('notifications/clear/', clear_notifications, name='clear_notifications'),
     
     path('settings/', notification_settings, name='notification_settings'),
