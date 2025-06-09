@@ -43,7 +43,7 @@ urlpatterns = [
     path('bills/<int:bill_id>/delete_bill_history/', views.delete_bill_from_history, name='delete_bill_from_history'),
 
     path('notifications/', notifications, name='notifications'),
-    path('notifications/<int:notification_id>/read/', mark_notification_read, name='mark_notification_read'),
+    path('notifications/read/', views.mark_notification_read, name='mark_notification_read'),
     path('notifications/clear/', clear_notifications, name='clear_notifications'),
     
     path('settings/', notification_settings, name='notification_settings'),

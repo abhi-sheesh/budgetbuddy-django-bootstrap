@@ -151,6 +151,26 @@ def expense_list(request):
     return render(request, 'tracker/expense_list.html', context)
 
 @login_required
+def edit_transaction(request, pk):
+    transaction = get_object_or_404(Transaction, pk=pk, user=request.user)
+    if request.method == 'POST':
+        form = TransactionForm(request.POST, instance=transaction, user=request.user)
+        if form.is_valid():
+            form.save()
+            return redirect('transactions')
+    else:
+        form = TransactionForm(instance=transaction, user=request.user)
+    return render(request, 'tracker/edit_transaction.html', {'form': form})
+
+@login_required
+def delete_transaction(request, pk):
+    transaction = get_object_or_404(Transaction, pk=pk, user=request.user)
+    if request.method == 'POST':
+        transaction.delete()
+        return redirect('transactions')
+    return render(request, 'tracker/delete_transaction.html', {'transaction': transaction})   
+
+@login_required
 def add_category(request):
     if request.method == 'POST':
         form = CategoryForm(request.POST)
@@ -167,6 +187,26 @@ def add_category(request):
 def category_list(request):
     categories = Category.objects.filter(user=request.user)
     return render(request, 'tracker/category_list.html', {'categories': categories})
+
+@login_required
+def edit_category(request, pk):
+    category = get_object_or_404(Category, pk=pk, user=request.user)
+    if request.method == 'POST':
+        form = CategoryForm(request.POST, instance=category)
+        if form.is_valid():
+            form.save()
+            return redirect('categories')
+    else:
+        form = CategoryForm(instance=category)
+    return render(request, 'tracker/edit_category.html', {'form': form})
+
+@login_required
+def delete_category(request, pk):
+    category = get_object_or_404(Category, pk=pk, user=request.user)
+    if request.method == 'POST':
+        category.delete()
+        return redirect('categories')
+    return render(request, 'tracker/delete_category.html', {'category': category})
 
 @login_required
 def add_budget(request):
@@ -187,6 +227,26 @@ def budget_list(request):
     return render(request, 'tracker/budget_list.html', {'budgets': budgets})
 
 @login_required
+def edit_budget(request, pk):
+    budget = get_object_or_404(Budget, pk=pk, user=request.user)
+    if request.method == 'POST':
+        form = BudgetForm(request.POST, instance=budget, user=request.user)
+        if form.is_valid():
+            form.save()
+            return redirect('budgets')
+    else:
+        form = BudgetForm(instance=budget, user=request.user)
+    return render(request, 'tracker/edit_budget.html', {'form': form})
+
+@login_required
+def delete_budget(request, pk):
+    budget = get_object_or_404(Budget, pk=pk, user=request.user)
+    if request.method == 'POST':
+        budget.delete()
+        return redirect('budgets')
+    return render(request, 'tracker/delete_budget.html', {'budget': budget})
+
+@login_required
 def add_goal(request):
     if request.method == 'POST':
         form = GoalForm(request.POST)
@@ -203,6 +263,26 @@ def add_goal(request):
 def goal_list(request):
     goals = Goal.objects.filter(user=request.user).order_by('-created_at')
     return render(request, 'tracker/goal_list.html', {'goals': goals})
+
+@login_required
+def edit_goal(request, pk):
+    goal = get_object_or_404(Goal, pk=pk, user=request.user)
+    if request.method == 'POST':
+        form = GoalForm(request.POST, instance=goal)
+        if form.is_valid():
+            form.save()
+            return redirect('goals')
+    else:
+        form = GoalForm(instance=goal)
+    return render(request, 'tracker/edit_goal.html', {'form': form})
+
+@login_required
+def delete_goal(request, pk):
+    goal = get_object_or_404(Goal, pk=pk, user=request.user)
+    if request.method == 'POST':
+        goal.delete()
+        return redirect('goals')
+    return render(request, 'tracker/delete_goal.html', {'goal': goal})
 
 @login_required
 def add_goal_deposit(request, goal_id):
@@ -290,96 +370,6 @@ def chart_data(request):
         }
     })
 
-@login_required
-def edit_transaction(request, pk):
-    transaction = get_object_or_404(Transaction, pk=pk, user=request.user)
-    if request.method == 'POST':
-        form = TransactionForm(request.POST, instance=transaction, user=request.user)
-        if form.is_valid():
-            form.save()
-            return redirect('transactions')
-    else:
-        form = TransactionForm(instance=transaction, user=request.user)
-    return render(request, 'tracker/edit_transaction.html', {'form': form})
-
-@login_required
-def delete_transaction(request, pk):
-    transaction = get_object_or_404(Transaction, pk=pk, user=request.user)
-    if request.method == 'POST':
-        transaction.delete()
-        return redirect('transactions')
-    return render(request, 'tracker/delete_transaction.html', {'transaction': transaction})
-
-@login_required
-def edit_category(request, pk):
-    category = get_object_or_404(Category, pk=pk, user=request.user)
-    if request.method == 'POST':
-        form = CategoryForm(request.POST, instance=category)
-        if form.is_valid():
-            form.save()
-            return redirect('categories')
-    else:
-        form = CategoryForm(instance=category)
-    return render(request, 'tracker/edit_category.html', {'form': form})
-
-@login_required
-def delete_category(request, pk):
-    category = get_object_or_404(Category, pk=pk, user=request.user)
-    if request.method == 'POST':
-        category.delete()
-        return redirect('categories')
-    return render(request, 'tracker/delete_category.html', {'category': category})
-
-@login_required
-def edit_budget(request, pk):
-    budget = get_object_or_404(Budget, pk=pk, user=request.user)
-    if request.method == 'POST':
-        form = BudgetForm(request.POST, instance=budget, user=request.user)
-        if form.is_valid():
-            form.save()
-            return redirect('budgets')
-    else:
-        form = BudgetForm(instance=budget, user=request.user)
-    return render(request, 'tracker/edit_budget.html', {'form': form})
-
-@login_required
-def delete_budget(request, pk):
-    budget = get_object_or_404(Budget, pk=pk, user=request.user)
-    if request.method == 'POST':
-        budget.delete()
-        return redirect('budgets')
-    return render(request, 'tracker/delete_budget.html', {'budget': budget})
-
-@login_required
-def edit_goal(request, pk):
-    goal = get_object_or_404(Goal, pk=pk, user=request.user)
-    if request.method == 'POST':
-        form = GoalForm(request.POST, instance=goal)
-        if form.is_valid():
-            form.save()
-            return redirect('goals')
-    else:
-        form = GoalForm(instance=goal)
-    return render(request, 'tracker/edit_goal.html', {'form': form})
-
-@login_required
-def delete_goal(request, pk):
-    goal = get_object_or_404(Goal, pk=pk, user=request.user)
-    if request.method == 'POST':
-        goal.delete()
-        return redirect('goals')
-    return render(request, 'tracker/delete_goal.html', {'goal': goal})
-
-# @login_required
-# def edit_transaction(request, pk):
-#     transaction = get_object_or_404(Transaction, pk=pk, user=request.user)
-#     if request.method == 'POST':
-#         form = TransactionForm(request.POST, instance=transaction, user=request.user)
-#         if form.is_valid():
-#             form.save()
-#             messages.success(request, 'Transaction updated successfully!')
-#             return redirect('transactions')
-
 def bills(request):
     bills = Bill.objects.filter(user=request.user).order_by('due_date')
     context = {
@@ -392,69 +382,6 @@ def bills(request):
     }
     return render(request, 'tracker/bills.html', context)
 
-def mark_paid(request, bill_id):
-    bill = get_object_or_404(Bill, id=bill_id, user=request.user)
-    bill.is_paid = True
-    bill.save()
-    
-    if request.POST.get('create_transaction'):
-        Transaction.objects.create(
-            user=request.user,
-            amount=-bill.amount,
-            category=bill.category,
-            date=timezone.now().date(),
-            description=f"Payment for {bill.name}"
-        )
-    
-    return redirect('bills')
-
-@login_required
-def edit_bill(request, bill_id):
-    bill = get_object_or_404(Bill, id=bill_id, user=request.user)
-    
-    if request.method == 'POST':
-        form = BillForm(request.POST, instance=bill)
-        if form.is_valid():
-            form.save()
-            messages.success(request, "Bill updated successfully!")
-            return redirect('bill_list')
-    else:
-        form = BillForm(instance=bill)
-    
-    return render(request, 'tracker/edit_bill.html', {'form': form, 'bill': bill})
-
-@login_required
-def delete_bill(request, bill_id):
-    bill = get_object_or_404(Bill, id=bill_id, user=request.user)
-    
-    if request.method == 'POST':
-        bill.delete()
-        messages.success(request, "Bill deleted successfully!")
-        return redirect('bill_list')
-    
-    return render(request, 'tracker/delete_bill.html', {'bill': bill})
-
-@login_required
-def delete_bill_from_history(request, bill_id):
-    bill = get_object_or_404(Bill, id=bill_id, user=request.user)
-    
-    if request.method == 'POST':
-        bill.delete()
-        messages.success(request, "Bill deleted successfully!")
-        return redirect('bill_history')
-    
-    return render(request, 'tracker/delete_bill_history.html', {'bill': bill})
-
-def notifications(request):
-    notifications = Notification.objects.filter(user=request.user)
-    unread = notifications.filter(is_read=False)
-    for notification in unread:
-        notification.is_read = True
-        notification.save()
-    
-    return render(request, 'tracker/notifications.html', 
-                 {'notifications': notifications})
-
 @login_required
 def bill_list(request):
     bills = Bill.objects.filter(
@@ -465,11 +392,6 @@ def bill_list(request):
 
     bills = Bill.objects.filter(user=request.user).order_by('due_date')
     return render(request, 'tracker/bill_list.html', {'bills': bills})
-
-@login_required
-def bill_history(request):
-    all_bills = Bill.objects.filter(user=request.user).order_by('-due_date')
-    return render(request, 'tracker/bill_history.html', {'bills': all_bills})
 
 @login_required
 def add_bill(request):
@@ -504,6 +426,48 @@ def mark_bill_paid(request, bill_id):
     
     return redirect('bill_list')
 
+@login_required
+def edit_bill(request, bill_id):
+    bill = get_object_or_404(Bill, id=bill_id, user=request.user)
+    
+    if request.method == 'POST':
+        form = BillForm(request.POST, instance=bill)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Bill updated successfully!")
+            return redirect('bill_list')
+    else:
+        form = BillForm(instance=bill)
+    
+    return render(request, 'tracker/edit_bill.html', {'form': form, 'bill': bill})
+
+@login_required
+def delete_bill(request, bill_id):
+    bill = get_object_or_404(Bill, id=bill_id, user=request.user)
+    
+    if request.method == 'POST':
+        bill.delete()
+        messages.success(request, "Bill deleted successfully!")
+        return redirect('bill_list')
+    
+    return render(request, 'tracker/delete_bill.html', {'bill': bill})
+
+@login_required
+def bill_history(request):
+    all_bills = Bill.objects.filter(user=request.user, is_paid = True).order_by('-due_date')
+    return render(request, 'tracker/bill_history.html', {'bills': all_bills})
+
+@login_required
+def delete_bill_from_history(request, bill_id):
+    bill = get_object_or_404(Bill, id=bill_id, user=request.user)
+    
+    if request.method == 'POST':
+        bill.delete()
+        messages.success(request, "Bill deleted successfully!")
+        return redirect('bill_history')
+    
+    return render(request, 'tracker/delete_bill_history.html', {'bill': bill})
+
 def calculate_next_due_date(current_date, frequency):
     if frequency == 'WEEKLY':
         return current_date + timedelta(weeks=1)
@@ -512,6 +476,16 @@ def calculate_next_due_date(current_date, frequency):
     elif frequency == 'YEARLY':
         return current_date + relativedelta(years=1)
     return current_date
+
+# def notifications(request):
+#     notifications = Notification.objects.filter(user=request.user)
+#     unread = notifications.filter(is_read=False)
+#     for notification in unread:
+#         notification.is_read = True
+#         notification.save()
+    
+#     return render(request, 'tracker/notifications.html', 
+#                  {'notifications': notifications})
 
 @login_required
 def notifications(request):
@@ -531,10 +505,10 @@ def notifications(request):
     })
 
 @login_required
-def mark_notification_read(request, notification_id):
-    notification = Notification.objects.get(id=notification_id, user=request.user)
-    notification.is_read = True
-    notification.save()
+def mark_notification_read(request):
+    notification = Notification.objects.filter(user=request.user, is_read = False)
+    if notification:
+        notification.update(is_read = True)
     return redirect('notifications')
 
 logger = logging.getLogger(__name__)
