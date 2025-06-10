@@ -31,13 +31,14 @@
                         <td>Rs {{ budget.amount|intcomma }}</td>
                         <td>
                             <div class="progress" style="height: 20px;">
-                                <div class="progress-bar {% if budget.progress > 100 %}bg-danger{% else %}bg-success{% endif %}" 
+                                <div class="progress-bar {% if budget.progress >= 100 %}bg-danger{% elif budget.progress > 80 %}bg-warning{% else %}bg-success{% endif %}" 
                                      role="progressbar" 
-                                     style="width: {{ budget.progress }}%" 
+                                     style="width: {% if budget.progress > 100 %}100{% else %}{{ budget.progress }}{% endif %}%; {% if budget.progress > 80 and budget.progress < 100 %}color: black; {% endif %}"
                                      aria-valuenow="{{ budget.progress }}" 
                                      aria-valuemin="0" 
-                                     aria-valuemax="100">
-                                    {{ budget.progress|floatformat:0 }}%
+                                     aria-valuemax="1000">
+                                    {{ budget.progress|stringformat:"0.3f"|slice:":-1" }}%
+
                                 </div>
                             </div>
                         </td>

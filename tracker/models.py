@@ -51,7 +51,7 @@ class Budget(models.Model):
             date__gte=self.start_date,
             date__lte=self.end_date
         ).aggregate(total=models.Sum('amount'))['total'] or 0
-        return min((expenses / self.amount) * 100, 100) if self.amount else 0
+        return (expenses / self.amount) * 100 if self.amount else 0
 
 class Goal(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)

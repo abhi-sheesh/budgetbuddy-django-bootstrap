@@ -10,6 +10,7 @@ from django.utils import timezone
 from dateutil.relativedelta import relativedelta
 from django.db.models.functions import TruncDay, Cast
 from django.db import models
+from sklearn.decomposition import PCA
 
 def detect_spending_patterns(user):
     transactions = Transaction.objects.filter(
@@ -55,8 +56,22 @@ def detect_spending_patterns(user):
             'average_day': round(avg_day),
             'size': len(cluster_data)
         })
+
+        features['cluster'] = clusters
+    features['category'] = features.index
     
-    return sorted(results, key=lambda x: x['average_amount'], reverse=True)
+    pca = PCA(n_components=2)
+    coords = pca.fit_transform(scaled_features)
+    features['x'] = coords[:, 0]
+    features['y'] = coords[:, 1]
+    
+    viz_data = features.reset_index().to_dict('records')
+    
+    return {
+        'clusters': sorted(results, key=lambda x: x['average_amount'], reverse=True),
+        'visualization_data': viz_data,
+        'cluster_centers': pca.transform(kmeans.cluster_centers_).tolist()
+    }
 
 def predict_future_expenses(user, months=3):
     end_date = timezone.now().date()

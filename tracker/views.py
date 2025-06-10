@@ -391,7 +391,7 @@ def bill_list(request):
         recurring = False
     ).order_by('due_date')
 
-    bills = Bill.objects.filter(user=request.user).order_by('due_date')
+    bills = Bill.objects.filter(user=request.user, is_paid = False).order_by('due_date')
     return render(request, 'tracker/bill_list.html', {'bills': bills})
 
 @login_required
@@ -550,10 +550,19 @@ def notification_settings(request):
     
     return render(request, 'tracker/notification_settings.html', {'form': form})
 
-def spending_patterns(request):
-    patterns = detect_spending_patterns(request.user)
-    return render(request, 'tracker/patterns.html', {'patterns': patterns})
 
+@login_required
+def spending_patterns(request):
+    result = detect_spending_patterns(request.user)
+    if result is None:
+        messages.warning(request, "Not enough data to detect patterns")
+        return render(request, 'tracker/patterns.html', {'clusters': []})
+    
+    return render(request, 'tracker/patterns.html', {
+        'clusters': result['clusters'],
+        'viz_data': json.dumps(result['visualization_data']),
+        'centers': json.dumps(result['cluster_centers'])
+    })
 
 @login_required
 def expense_forecast(request):
@@ -592,7 +601,7 @@ def income_expense_comparison(request):
     income_data = []
     expense_data = []
     
-    unique_periods = sorted(set(t['period'] for t in transactions), reverse=True)[:5]
+    unique_periods = sorted(set(t['period'] for t in transactions), reverse=True)[:6]
     unique_periods.reverse() 
     
     for period in unique_periods:

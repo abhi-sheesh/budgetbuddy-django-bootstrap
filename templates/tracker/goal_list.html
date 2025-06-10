@@ -29,7 +29,7 @@
                             <strong>Saved:</strong> Rs {{ goal.current_amount }}
                         </div>
                         <div class="text-end">
-                            <strong>Progress:</strong> {{ goal.progress|floatformat:0 }}%<br>
+                            <strong>Progress:</strong> {{ goal.progress|stringformat:"0.3f"|slice:":-1" }}%<br>
                             <strong>Due:</strong> {{ goal.target_date|date:"M d, Y" }}
                         </div>
                     </div>

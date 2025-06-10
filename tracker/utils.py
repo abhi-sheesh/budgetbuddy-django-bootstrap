@@ -1,6 +1,6 @@
 from datetime import timedelta
 from django.utils import timezone
-from .models import Notification, Budget, Goal, Bill
+from .models import Notification, Budget, Goal, Bill, NotificationPreference
 
 def should_send_notification(notification_type, user, message):
     now = timezone.now()
@@ -39,26 +39,51 @@ def create_notification(user, message, notification_type, repeat_frequency='ONCE
         )
 
 def check_budget_alerts(user):
+
+    try:
+        prefs = NotificationPreference.objects.get(user=user)
+    except NotificationPreference.DoesNotExist:
+        prefs = NotificationPreference(user=user)
+    
+    if not prefs.budget_alerts:
+        return
+    
     budgets = Budget.objects.filter(user=user)
     for budget in budgets:
         progress = budget.progress()
         truncated = int(progress*100)/100
-        if progress >= 90:
+        overboard = progress-100
+        if progress >= prefs.budget_threshold and progress <=100:
             create_notification(
                 user,
                 f"Budget for {budget.category} is at {truncated:.2f}%",
                 'BUDGET',
                 'DAILY' if progress >= 95 else 'WEEKLY'
             )
+        if progress > 100:
+            create_notification(
+                user,
+                f"Budget for {budget.category} is at {truncated:.2f}% which is {overboard:.2f}% above your budget.",
+                'BUDGET'
+            )
 
 def check_goal_alerts(user):
+
+    try:
+        prefs = NotificationPreference.objects.get(user=user)
+    except NotificationPreference.DoesNotExist:
+        prefs = NotificationPreference(user=user)
+
+    if not prefs.goal_alerts:
+        return
+        
     goals = Goal.objects.filter(user=user, completed=False)
     for goal in goals:
         progress = goal.progress()
         truncated = int(progress*100)/100
         days_left = (goal.target_date - timezone.now().date()).days
         
-        if progress >= 90:
+        if progress >= prefs.goal_days_prior:
             create_notification(
                 user,
                 f"Goal '{goal.name}' is {truncated:.2f}% complete!",

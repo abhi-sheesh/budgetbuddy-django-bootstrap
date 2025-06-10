@@ -67,7 +67,7 @@
                              aria-valuenow="{{ budget.progress }}" 
                              aria-valuemin="0" 
                              aria-valuemax="100">
-                            {{ budget.progress|floatformat:0 }}%
+                            {{ budget.progress|stringformat:"0.3f"|slice:":-1" }}%
                         </div>
                     </div>
                     <small>{{ budget.start_date }} to {{ budget.end_date }}</small>
@@ -134,7 +134,7 @@
                                          aria-valuenow="{{ goal.progress }}" 
                                          aria-valuemin="0" 
                                          aria-valuemax="100">
-                                        {{ goal.progress|floatformat:0 }}%
+                                       {{ goal.progress|stringformat:"0.3f"|slice:":-1" }}%
                                     </div>
                                 </div>
                                 <p class="mt-2"><small>Target: {{ goal.target_date }}</small></p>

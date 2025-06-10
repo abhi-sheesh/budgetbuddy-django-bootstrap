@@ -1,22 +1,90 @@
 {% extends 'base.html' %}
+{% load humanize %}
+
+{% block extra_css %}
+<style>
+    #clusterViz {
+        width: 100%;
+        height: 500px;
+    }
+    .cluster-card {
+        border-left: 4px solid;
+        margin-bottom: 1rem;
+    }
+    .cluster-0 { border-color: #4e79a7; }
+    .cluster-1 { border-color: #f28e2b; }
+    .cluster-2 { border-color: #e15759; }
+    .cluster-3 { border-color: #76b7b2; }
+    .cluster-4 { border-color: #59a14f; }
+</style>
+{% endblock %}
 
 {% block content %}
 <div class="container">
-    <h2>Your Spending Patterns</h2>
+    <h2 class="my-4">Your Spending Patterns</h2>
     
-    {% if patterns %}
+    {% if clusters %}
     <div class="row">
-        {% for pattern in patterns %}
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>Spending Clusters Visualization</h5>
+                </div>
+                <div class="card-body">
+                    <div id="clusterViz"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Pattern Summary</h5>
+                </div>
+                <div class="card-body">
+                    {% for cluster in clusters %}
+                    <div class="card cluster-card cluster-{{ forloop.counter0 }} mb-3">
+                        <div class="card-body">
+                            <h6>Pattern {{ forloop.counter }}</h6>
+                            <p class="mb-1">
+                                <strong>Categories:</strong> 
+                                {{ cluster.categories|join:", "|truncatewords:5 }}
+                            </p>
+                            <p class="mb-1">
+                                <strong>Avg Amount:</strong> 
+                                Rs {{ cluster.average_amount|floatformat:2|intcomma }}
+                            </p>
+                            <p class="mb-1">
+                                <strong>Common Day:</strong> 
+                                {{ cluster.average_day }}th of month
+                            </p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        {% for cluster in clusters %}
         <div class="col-md-4 mb-4">
             <div class="card">
                 <div class="card-header">
-                    <h5>Pattern {{ forloop.counter }}</h5>
+                    <h5>Pattern {{ forloop.counter }} Details</h5>
                 </div>
                 <div class="card-body">
-                    <p><strong>Categories:</strong> {{ pattern.categories|join:", " }}</p>
-                    <p><strong>Average Amount:</strong> Rs {{ pattern.average_amount|floatformat:2 }}</p>
-                    <p><strong>Common Day:</strong> Around {{ pattern.average_day }}th of month</p>
-                    <p><strong>Transactions:</strong> {{ pattern.size }}</p>
+                    <h6>Categories:</h6>
+                    <ul>
+                        {% for category in cluster.categories %}
+                        <li>{{ category }}</li>
+                        {% endfor %}
+                    </ul>
+                    <div class="mt-3">
+                        <p><strong>Average Amount:</strong> Rs {{ cluster.average_amount|floatformat:2 }}</p>
+                        <p><strong>Typical Spending Day:</strong> Around {{ cluster.average_day }}th of month</p>
+                        <p><strong>Number of Transactions:</strong> {{ cluster.size }}</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -28,4 +96,75 @@
     </div>
     {% endif %}
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const vizData = {{ viz_data|safe }};
+    const centers = {{ centers|safe }};
+    
+    if (vizData && centers) {
+        const traces = [];
+        const colors = ['#4e79a7', '#f28e2b', '#e15759', '#76b7b2', '#59a14f'];
+        
+        const clusters = [...new Set(vizData.map(item => item.cluster))];
+        
+        clusters.forEach(cluster => {
+            const clusterData = vizData.filter(item => item.cluster === cluster);
+            
+            traces.push({
+                x: clusterData.map(item => item.x),
+                y: clusterData.map(item => item.y),
+                text: clusterData.map(item => 
+                    `${item.category}<br>Avg: Rs ${item.amount_mean.toFixed(2)}<br>Transactions: ${item.transaction_count}`
+                ),
+                mode: 'markers',
+                type: 'scatter',
+                name: `Cluster ${cluster+1}`,
+                marker: {
+                    color: colors[cluster],
+                    size: clusterData.map(item => Math.min(20, 10 + item.transaction_count/2)),
+                    opacity: 0.8
+                },
+                hoverinfo: 'text'
+            });
+        });
+        
+        traces.push({
+            x: centers.map(c => c[0]),
+            y: centers.map(c => c[1]),
+            mode: 'markers',
+            type: 'scatter',
+            name: 'Cluster Centers',
+            marker: {
+                color: '#000',
+                size: 12,
+                symbol: 'x'
+            },
+            hoverinfo: 'none'
+        });
+        
+        const layout = {
+            title: 'Spending Categories Clustering',
+            xaxis: { title: 'Principal Component 1' },
+            yaxis: { title: 'Principal Component 2' },
+            hovermode: 'closest',
+            showlegend: true,
+            margin: { t: 30, b: 30, l: 30, r: 30 }
+        };
+        
+        Plotly.newPlot('clusterViz', traces, layout);
+        
+        document.getElementById('clusterViz').on('plotly_click', function(data) {
+            const point = data.points[0];
+            if (point) {
+                const category = point.data.text[point.pointNumber].split('<br>')[0];
+                alert(`Selected: ${category}\nCluster: ${point.data.name}`);
+            }
+        });
+    }
+});
+</script>
 {% endblock %}
