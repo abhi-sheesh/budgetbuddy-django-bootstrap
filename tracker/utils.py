@@ -100,10 +100,19 @@ def check_goal_alerts(user):
             )
 
 def check_bill_reminders(user):
+    
+    try:
+        prefs = NotificationPreference.objects.get(user=user)
+    except NotificationPreference.DoesNotExist:
+        prefs = NotificationPreference(user=user)
+
+    if not prefs.bill_reminders:
+        return
+        
     upcoming_bills = Bill.objects.filter(
         user=user,
         is_paid=False,
-        due_date__lte=timezone.now().date() + timedelta(days=7)
+        due_date__lte=timezone.now().date() + timedelta(days=prefs.bill_days_prior)
     )
     
     for bill in upcoming_bills:
