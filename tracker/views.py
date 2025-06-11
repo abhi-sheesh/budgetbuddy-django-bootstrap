@@ -410,8 +410,14 @@ def add_bill(request):
 @login_required
 def mark_bill_paid(request, bill_id):
     bill = Bill.objects.get(id=bill_id, user=request.user)
-    bill.is_paid = True
-    bill.save()
+    
+    if not bill.is_paid:
+        bill.is_paid = True
+        bill.save()
+        messages.success(request, f"Bill '{bill.name}' marked as paid and added to expenses")
+    
+    else:
+        messages.warning(request, "Bill was already paid")
     
     if bill.recurring:
         new_due_date = calculate_next_due_date(bill.due_date, bill.recurring_frequency)

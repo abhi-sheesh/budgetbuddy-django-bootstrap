@@ -101,10 +101,23 @@ class GoalDepositForm(forms.ModelForm):
 class BillForm(forms.ModelForm):
     class Meta:
         model = Bill
-        fields = ['name', 'amount', 'due_date', 'recurring', 'recurring_frequency']
+        fields = ['name', 'amount', 'due_date', 'category', 'recurring', 'recurring_frequency']
         widgets = {
             'due_date': forms.DateInput(attrs={'type': 'date'}),
+            'category': forms.Select(attrs={'class': 'form-select'}),
         }
+    
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+        
+        if user:
+            self.fields['category'].queryset = Category.objects.filter(
+                user=user,
+                category_type='EX'
+            )
+            
+            self.fields['recurring_frequency'].required = False
 
 class NotificationPreferenceForm(forms.ModelForm):
     class Meta:

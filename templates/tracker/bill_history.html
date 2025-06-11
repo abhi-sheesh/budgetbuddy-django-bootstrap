@@ -34,7 +34,7 @@
                         <td>{{ bill.due_date }}</td>
                         <td>
                             {% if bill.is_paid %}
-                                {{ bill.updated_at|date:"Y-m-d" }}
+                                {{ bill.paid_date|date:"Y-m-d" }}
                             {% else %}
                                 -
                             {% endif %}
@@ -48,7 +48,7 @@
                         </td>
                         <td>
                             {% if bill.is_paid %}
-                                <span class="badge bg-success">Paid</span>
+                                <span class="badge bg-success"><i class="bi bi-check-circle"></i>Paid</span>
                             {% else %}
                                 <span class="badge bg-warning text-dark">Pending</span>
                             {% endif %}

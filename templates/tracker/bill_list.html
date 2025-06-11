@@ -21,6 +21,7 @@
                         <th>Name</th>
                         <th>Amount</th>
                         <th>Due Date</th>
+                        <th>Category</th>
                         <th>Recurring</th>
                         <th>Status</th>
                         <th>Actions</th>
@@ -33,6 +34,7 @@
                         <td>{{ bill.name }}</td>
                         <td>Rs {{ bill.amount }}</td>
                         <td>{{ bill.due_date }}</td>
+                        <td>{{ bill.category.name|default:"-" }}
                         <td>
                             {% if bill.recurring %}
                                 <span class="badge bg-info text-dark">{{ bill.get_recurring_frequency_display }}</span>

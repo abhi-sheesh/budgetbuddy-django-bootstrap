@@ -3,6 +3,8 @@ from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator
 from django.utils import timezone
 from django.core.exceptions import ValidationError
+from datetime import timedelta
+from dateutil.relativedelta import relativedelta
 
 class Category(models.Model):
     name = models.CharField(max_length=100)
@@ -118,15 +120,54 @@ class Bill(models.Model):
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     due_date = models.DateField()
     is_paid = models.BooleanField(default=False)
+    paid_date = models.DateField(null=True, blank=True)
+    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True)
     recurring = models.BooleanField(default=False)
     recurring_frequency = models.CharField(max_length=20, blank=True, choices=[
         ('WEEKLY', 'Weekly'),
         ('MONTHLY', 'Monthly'),
         ('YEARLY', 'Yearly')
     ])
+    def save(self, *args, **kwargs):
+        if self.is_paid and not self.paid_date:
+                self.paid_date = timezone.now().date()
+                Transaction.objects.create(
+                    user=self.user,
+                    category=self.category,
+                    amount=self.amount,
+                    date=self.paid_date,
+                    description=f"Bill payment: {self.name}"
+                )
+
+                if self.recurring:
+                    self._create_next_recurrence()
+            
+        super().save(*args, **kwargs)
+
+    def _create_next_recurrence(self):
+        next_date = None
+        if self.recurring_frequency == 'WEEKLY':
+            next_date = self.due_date + timedelta(weeks=1)
+        elif self.recurring_frequency == 'MONTHLY':
+            next_date = self.due_date + relativedelta(months=1)
+        elif self.recurring_frequency == 'YEARLY':
+            next_date = self.due_date + relativedelta(years=1)
+        
+        if next_date:
+            Bill.objects.create(
+                user=self.user,
+                name=self.name,
+                amount=self.amount,
+                due_date=next_date,
+                category=self.category,
+                recurring=True,
+                recurring_frequency=self.recurring_frequency,
+                is_paid=False
+            )
+
 
     def __str__(self):
-        return f"{self.name} - ₹{self.amount} (Due: {self.due_date})"
+        return f"{self.name} - Rs {self.amount} (Due: {self.due_date})"
 
 class NotificationPreference(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
