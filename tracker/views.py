@@ -8,7 +8,7 @@ from django.utils import timezone
 from datetime import datetime, timedelta
 from django_filters.views import FilterView
 from django_tables2.views import SingleTableMixin
-from .filters import TransactionFilter
+from .filters import TransactionFilter, IncomeFilter, ExpenseFilter
 from django.core.paginator import Paginator
 from django.views.generic import ListView
 from django.contrib import messages
@@ -90,17 +90,34 @@ def dashboard(request):
     return render(request, 'tracker/dashboard.html', context)
 
 @login_required
-def add_transaction(request):
+def add_income(request):
     if request.method == 'POST':
         form = TransactionForm(request.POST, user=request.user)
+        form.fields['category'].queryset = Category.objects.filter(user=request.user, category_type='IN')
         if form.is_valid():
             transaction = form.save(commit=False)
             transaction.user = request.user
             transaction.save()
-            return redirect('transactions')
+            return redirect('incomes')
     else:
         form = TransactionForm(user=request.user)
-    return render(request, 'tracker/add_transaction.html', {'form': form})
+        form.fields['category'].queryset = Category.objects.filter(user=request.user, category_type='IN')
+    return render(request, 'tracker/add_income.html', {'form': form})
+
+@login_required
+def add_expense(request):
+    if request.method == 'POST':
+        form = TransactionForm(request.POST, user=request.user)
+        form.fields['category'].queryset = Category.objects.filter(user=request.user, category_type='EX')
+        if form.is_valid():
+            transaction = form.save(commit=False)
+            transaction.user = request.user
+            transaction.save()
+            return redirect('expenses')
+    else:
+        form = TransactionForm(user=request.user)
+        form.fields['category'].queryset = Category.objects.filter(user=request.user, category_type='EX')
+    return render(request, 'tracker/add_expense.html', {'form': form})
 
 @login_required
 def transaction_list(request):
@@ -126,12 +143,12 @@ def income_list(request):
         category__category_type='IN'
     ).order_by('-date')
     
-    transaction_filter = TransactionFilter(request.GET, queryset=incomes, user=request.user)
-    incomes = transaction_filter.qs
+    income_filter = IncomeFilter(request.GET, queryset=incomes, user=request.user)
+    incomes = income_filter.qs
     
     context = {
         'incomes': incomes,
-        'filter': transaction_filter,
+        'filter': income_filter,
     }
     return render(request, 'tracker/income_list.html', context)
 
@@ -142,12 +159,12 @@ def expense_list(request):
         category__category_type='EX'
     ).order_by('-date')
     
-    transaction_filter = TransactionFilter(request.GET, queryset=expenses, user=request.user)
-    expenses = transaction_filter.qs
+    expense_filter = ExpenseFilter(request.GET, queryset=expenses, user=request.user)
+    expenses = expense_filter.qs
     
     context = {
         'expenses': expenses,
-        'filter': transaction_filter,
+        'filter': expense_filter,
     }
     return render(request, 'tracker/expense_list.html', context)
 

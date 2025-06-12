@@ -47,25 +47,25 @@ def check_budget_alerts(user):
     
     if not prefs.budget_alerts:
         return
-    
-    budgets = Budget.objects.filter(user=user)
-    for budget in budgets:
-        progress = budget.progress()
-        truncated = int(progress*100)/100
-        overboard = progress-100
-        if progress >= prefs.budget_threshold and progress <=100:
-            create_notification(
-                user,
-                f"Budget for {budget.category} is at {truncated:.2f}%",
-                'BUDGET',
-                'DAILY' if progress >= 95 else 'WEEKLY'
-            )
-        if progress > 100:
-            create_notification(
-                user,
-                f"Budget for {budget.category} is at {truncated:.2f}% which is {overboard:.2f}% above your budget.",
-                'BUDGET'
-            )
+    else:
+        budgets = Budget.objects.filter(user=user)
+        for budget in budgets:
+            progress = budget.progress()
+            truncated = int(progress*100)/100
+            overboard = progress-100
+            if progress >= prefs.budget_threshold and progress <=100:
+                create_notification(
+                    user,
+                    f"Budget for {budget.category} is at {truncated:.2f}%",
+                    'BUDGET',
+                    'DAILY' if progress >= 95 else 'WEEKLY'
+                )
+            if progress > 100:
+                create_notification(
+                    user,
+                    f"Budget for {budget.category} is at {truncated:.2f}% which is {overboard:.2f}% above your budget.",
+                    'BUDGET'
+                )
 
 def check_goal_alerts(user):
 
