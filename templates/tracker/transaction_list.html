@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load humanize %}
+{% load widget_tweaks %}
 
 {% block title %}Transactions{% endblock %}
 
@@ -8,28 +9,37 @@
     <h1>Transactions</h1>
 </div>
 
-<div class="card mb-4">
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-primary text-white">
+        <h5 class="mb-0">Filter Transactions</h5>
+    </div>
     <div class="card-body">
-        <form method="get" class="row g-3">
-            <div class="col-md-3">
-                {{ filter.form.date_range.label_tag }}
-                {{ filter.form.date_range }}
-            </div>
-            <div class="col-md-3">
-                {{ filter.form.start_date.label_tag }}
-                {{ filter.form.start_date }}
-            </div>
-            <div class="col-md-3">
-                {{ filter.form.end_date.label_tag }}
-                {{ filter.form.end_date }}
-            </div>
-            <div class="col-md-3">
-                {{ filter.form.category.label_tag }}
-                {{ filter.form.category }}
-            </div>
-            <div class="col-12">
-                <button type="submit" class="btn btn-primary">Filter</button>
-                <a href="{% url 'transactions' %}" class="btn btn-secondary">Reset</a>
+        <form method="get">
+            <div class="row g-4">
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold">{{ filter.form.date_range.label }}</label>
+                    {{ filter.form.date_range|add_class:"form-select" }}
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold">{{ filter.form.start_date.label }}</label>
+                    {{ filter.form.start_date|add_class:"form-control" }}
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold">{{ filter.form.end_date.label }}</label>
+                    {{ filter.form.end_date|add_class:"form-control" }}
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold">{{ filter.form.category.label }}</label>
+                    {{ filter.form.category|add_class:"form-select" }}
+                </div>
+                <div class="col-12 d-flex justify-content-end gap-2 pt-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-funnel-fill me-1"></i> Filter
+                    </button>
+                    <a href="{% url 'transactions' %}" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-clockwise me-1"></i> Reset
+                    </a>
+                </div>
             </div>
         </form>
     </div>
