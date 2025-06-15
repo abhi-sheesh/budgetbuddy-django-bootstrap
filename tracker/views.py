@@ -146,8 +146,12 @@ def income_list(request):
     income_filter = IncomeFilter(request.GET, queryset=incomes, user=request.user)
     incomes = income_filter.qs
     
+    paginator = Paginator(incomes, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
     context = {
-        'incomes': incomes,
+        'page_obj' : page_obj,
         'filter': income_filter,
     }
     return render(request, 'tracker/income_list.html', context)
@@ -161,9 +165,13 @@ def expense_list(request):
     
     expense_filter = ExpenseFilter(request.GET, queryset=expenses, user=request.user)
     expenses = expense_filter.qs
+
+    paginator = Paginator(expenses, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
     
     context = {
-        'expenses': expenses,
+        'page_obj' : page_obj,
         'filter': expense_filter,
     }
     return render(request, 'tracker/expense_list.html', context)

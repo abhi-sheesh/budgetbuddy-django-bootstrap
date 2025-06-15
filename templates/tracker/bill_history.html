@@ -4,13 +4,10 @@
 <div class="container">
     <h2 class="my-4">Bill History</h2>
     <div>
-            {% comment %} <a href="{% url 'delete_bill_history' %}" class="btn btn-outline-danger">
-                <i class="bi bi-trash"></i> Clear History
-            </a> {% endcomment %}
-            <a href="{% url 'bill_list' %}" class="btn btn-outline-secondary">
-                <i class="bi bi-arrow-left"></i> Back to Bills
-            </a>
-        </div>
+        <a href="{% url 'bill_list' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Back to Bills
+        </a>
+    </div>
     
     <div class="card">
         <div class="card-body">
@@ -21,6 +18,7 @@
                         <th>Amount</th>
                         <th>Due Date</th>
                         <th>Paid Date</th>
+                        <th>Category</th>
                         <th>Recurring</th>
                         <th>Status</th>
                         <th>Actions</th>
@@ -39,6 +37,7 @@
                                 -
                             {% endif %}
                         </td>
+                        <td>{{ bill.category.name }}</td>
                         <td>
                             {% if bill.recurring %}
                                 {{ bill.get_recurring_frequency_display }}
