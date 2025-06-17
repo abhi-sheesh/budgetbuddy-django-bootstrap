@@ -25,3 +25,7 @@ pip install django-extensions graphviz //for_database_diagrams...didn't_work_lol
 python manage.py runserver (will run at port 8000 default but specify port if necessary like 8001)
 
 install remaining necessary libraries
+
+
+username: kuroiraijin
+password: gaynixan69
