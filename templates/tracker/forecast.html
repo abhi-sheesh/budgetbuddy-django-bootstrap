@@ -3,14 +3,14 @@
 {% block content %}
 <div class="container">
     <h2>Expense Forecast</h2>
-    
+
     {% if forecast %}
     <div class="card">
         <div class="card-body">
-            <canvas id="forecastChart"></canvas>
+            <canvas id="forecastChart" width="400" height="200"></canvas>
         </div>
     </div>
-    
+
     <table class="table mt-4">
         <thead>
             <tr>
@@ -27,13 +27,35 @@
             {% endfor %}
         </tbody>
     </table>
-    
+
+    <!-- JavaScript variables for Chart.js -->
+    <script>
+        const forecastData = {
+            labels: [{% for prediction in forecast %}"{{ prediction.month }}"{% if not forloop.last %}, {% endif %}{% endfor %}],
+            datasets: [{
+                label: 'Predicted Expenses',
+                data: [{% for prediction in forecast %}{{ prediction.predicted_amount|floatformat:"2"|add:"0" }}{% if not forloop.last %}, {% endif %}{% endfor %}],
+                backgroundColor: 'rgba(78, 121, 167, 0.2)',
+                borderColor: 'rgba(78, 121, 167, 1)',
+                borderWidth: 2,
+                tension: 0.3,
+                fill: true,
+                pointRadius: 4
+            }]
+        };
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         const ctx = document.getElementById('forecastChart').getContext('2d');
         new Chart(ctx, {
             type: 'line',
             data: forecastData,
             options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: true }
+                },
                 scales: {
                     y: {
                         beginAtZero: true,
@@ -54,3 +76,6 @@
     {% endif %}
 </div>
 {% endblock %}
+
+
+
