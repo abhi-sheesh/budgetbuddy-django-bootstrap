@@ -27,8 +27,7 @@
             {% endfor %}
         </tbody>
     </table>
-
-    <!-- JavaScript variables for Chart.js -->
+    
     <script>
         const forecastData = {
             labels: [{% for prediction in forecast %}"{{ prediction.month }}"{% if not forloop.last %}, {% endif %}{% endfor %}],
