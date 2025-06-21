@@ -444,17 +444,17 @@ def mark_bill_paid(request, bill_id):
     else:
         messages.warning(request, "Bill was already paid")
     
-    if bill.recurring:
-        new_due_date = calculate_next_due_date(bill.due_date, bill.recurring_frequency)
-        Bill.objects.create(
-            user=request.user,
-            name=bill.name,
-            amount=bill.amount,
-            due_date=new_due_date,
-            recurring=True,
-            recurring_frequency=bill.recurring_frequency,
-            is_paid=False 
-        )
+    # if bill.recurring:
+    #     new_due_date = calculate_next_due_date(bill.due_date, bill.recurring_frequency)
+    #     Bill.objects.create(
+    #         user=request.user,
+    #         name=bill.name,
+    #         amount=bill.amount,
+    #         due_date=new_due_date,
+    #         recurring=True,
+    #         recurring_frequency=bill.recurring_frequency,
+    #         is_paid=False 
+    #     )
     
     return redirect('bill_list')
 
