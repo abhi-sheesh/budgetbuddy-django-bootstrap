@@ -38,7 +38,7 @@ def generate_test_expense_data(user, days=365):
         )
         count += 1
 
-    print(f"✅ Generated {count} expense transactions for user {user.username}")
+    print(f"Generated {count} expense transactions for user {user.username}")
 
 if __name__ == '__main__':
     user = User.objects.get(username='abhishesh')
